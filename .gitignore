@@ -4,5 +4,6 @@
 /files/__pycache__
 /GUI/__pycache__
 /benchmark
+/_forVSCODE
 *.xlsx
 *.xlsm
