@@ -1,0 +1,8 @@
+/old
+/__pycache__
+/calc/__pycache__
+/files/__pycache__
+/GUI/__pycache__
+/benchmark
+*.xlsx
+*.xlsm
