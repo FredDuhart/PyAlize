@@ -65,7 +65,7 @@ def R_star(n, H, z, lb , R , E, nu, isbonded, m, z_points, rr, c_points):
     
     # valeur de Fn
     
-    lb.append(np.Inf) # Infini pour couche n (substratum)
+    lb.append(np.inf) # infini pour couche n (substratum)
     Fn=math.exp(-m * (lb[n-1] - lb[n-2]))
     
     F.append(Fn)
@@ -335,7 +335,7 @@ z=[0.06, 0.16, 0.28]
 
 
 
-lb=[0.21428571428571425, 0.5714285714285714, 1.0, np.Inf]
+lb=[0.21428571428571425, 0.5714285714285714, 1.0, np.inf]
 R=[0.7, 0.8333333333333335, 239.99999999999997]
 E=[7000, 10000, 12000, 50]
 nu=[0.35, 0.35, 0.35, 0.35]

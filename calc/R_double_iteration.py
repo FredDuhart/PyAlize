@@ -107,7 +107,7 @@ def R (q, a, th, E, nu, isbonded, z_points, r_points, iteration = 25) :
         zi=z[i]/H
         lb.append(zi)
     
-    lb.append(np.Inf) # Infini pour couche n (substratum)
+    lb.append(np.inf) # infini pour couche n (substratum)
         
     
     # calcul des valeurs R(i)
