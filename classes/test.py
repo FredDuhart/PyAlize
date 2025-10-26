@@ -1,5 +1,7 @@
 from class_struct import *
 from class_calculation import *
+from class_calc_params import *
+from class_load import load
 
 
 '''
@@ -32,21 +34,41 @@ struct.add_layer(d_layer)
 
 print (struct.htot())
 for l in struct.layers :
-    print (f'{l.order}  {l.name}   {l.thickness} cm    {l.module} Mpa  {l.poisson} Collée = {l.interface}   lambda = {l.lb}')
+    print (f'{l.order}  {l.name}   {l.thickness} m    {l.module} Mpa  {l.poisson} Collée = {l.interface}    z = {l.z}   lambda = {l.lb}')
+
+
+# chargement
+
+load = load()
+print ('---- paramètres de charge -------')
+type = 'roue simple'
+if load.disj >0 : type ='jumelage'
+print (f'type = {type}')
+print ('q (MPa) = ', load.load)
+print ('rayon (m) = ', load.radius)
 
 
 
-# soll *
+# paramètres de calcul
+
+params = calc_params(struct)
+
+params.r_points = [0, 0.2]
 
 
+print ('---- paramètres de calcul -------')
+print ('z_point ' , params.z_points)
+print ('c_points ', params.c_points)
+print ('r_points ', params.r_points)
 
-c_points = gen_c_points(struct, z_points)
+# Calculs
+print ('------------ CALCULS --------------')
+print()
 
+resultats = calculation(struct, params, load)
 
-print (f'z_points = {z_points}')
-print (f'c_points = {c_points}')
-
-
-
-m=1
-r_point = 0
+print ('valeurs de m')
+mm = resultats.mValues
+print (f'il y a {len(mm)}')
+for m in mm :
+    print (m)
