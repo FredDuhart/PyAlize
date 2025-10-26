@@ -1,0 +1,513 @@
+# -*- coding: utf-8 -*-
+"""
+
+@author: f.duhart
+"""
+'''
+
+à documenter
+
+'''
+import numpy as np
+import math
+from scipy.special import j0
+from scipy.special import j1
+
+from class_struct import structure, layer
+
+
+class calculation :
+    def __init__(self, structure : structure):
+        self.name : str = None
+        
+        self.struct = structure
+        self.layers = self.struct.layers
+
+
+        # points de calcul
+        self.z_points=None
+        self.c_points=None
+        self.r_points=None
+
+
+    def R(self) :
+        # calcul des valeurs R(i)
+        
+        n = len(self.layers)
+
+        R=[]
+        
+        # R[0] -  equations B.12a et B.12b 
+        
+        #R0=(E[0]/E[1])*(1+nu[1])/(1+nu[0])
+        R0=(self.layers[0].module/self.layers[1].module)*(1+self.layers[1].poisson)/(1+self.layers[0].poisson)
+        R.append(R0)
+        
+        # R[i] pour i=1 to n-1-1  -  equations B.12a et B.12b 
+        
+        for i in range (n-2):
+            
+            #Ri = (E[i+1]/E[i+2])*(1+nu[i+2])/(1+nu[i+1])
+            Ri = (self.layers[i+1].module/self.layers[i+2].module)*(1+self.layers[i+2].poisson)/(1+self.layers[i+1].poisson)
+            R.append(Ri)
+
+        return R
+
+    def F_m(self,  m):
+                     
+        n = len (self.layers)
+                        
+        ''' --------------------------------------- '''
+        ''' calcul des valeurs F(i)  '''
+
+        F=[]
+
+        ''' F[0] '''
+        ''' equations B.12a et B.12b '''
+   
+        #F0=math.exp(-m* (lb[0]-0))
+        F0=math.exp(-m* (self.layers[0].lb-0))
+        F.append(F0)
+        
+        
+        ''' F[i]  pour i=1 to n-1-1 '''
+        ''' equations B.12a et B.12b '''
+        
+        for i in range (n-2):
+            Fi = math.exp(-m* (self.layers[i+1].lb-self.layers[i].lb))
+            F.append(Fi)
+                
+
+        return F
+       
+    def MMMM (self, R, F, m) : #all bonded
+            
+        n = len (self.layers)
+        ''' --------------------------------------- '''
+        ''' calcul des matrices de l'équation B.11 '''
+
+        MM1=[]
+        MM2=[]
+        M=[]
+        
+        for couche in range(n-2): # toutes les couches sauf le substratum
+
+            s=(4,4)
+            M1 = np.zeros(s, dtype=np.float64)
+            M2 = np.zeros(s, dtype=np.float64)
+
+    
+                        
+            # Matrice M1 (gauche)
+            M1[0,0]=1
+            M1[1,0]=1
+            M1[2,0]=1
+            M1[3,0]=1
+
+            M1[0,1] = F[couche]
+            M1[1,1] = -F[couche]
+            M1[2,1] = F[couche]
+            M1[3,1] = -F[couche]
+            
+            M1[0,2] = -(1 - 2 * self.layers[couche].poisson - m * self.layers[couche].lb)
+            M1[1,2] = (2 * self.layers[couche].poisson + m * self.layers[couche].lb)
+            M1[2,2] = 1 + m * self.layers[couche].lb
+            M1[3,2] = -(2 - 4 * self.layers[couche].poisson - m * self.layers[couche].lb)
+
+            M1[0,3] = (1 - 2 * self.layers[couche].poisson + m * self.layers[couche].lb) * F[couche]              
+            M1[1,3] = (2 * self.layers[couche].poisson - m * self.layers[couche].lb) * F[couche]
+            M1[2,3] = -(1 - m * self.layers[couche].lb )* F[couche]
+            M1[3,3] = -(2 - 4 * self.layers[couche].poisson + m * self.layers[couche].lb) * F[couche]
+            
+            MM1.append(M1)
+        
+            # Matrice M2 (droite)
+        
+            M2[0,0] = F[couche+1]
+            M2[1,0] = F[couche+1]
+            M2[2,0] = R[couche] * F[couche+1]
+            M2[3,0] = R[couche] * F[couche+1]
+
+            M2[0,1] = 1
+            M2[1,1] = -1
+            M2[2,1] = R[couche]
+            M2[3,1] =-R[couche]
+
+            M2[0,2] = -(1 - 2 * self.layers[couche+1].poisson - m * self.layers[couche].lb) * F[couche+1]
+            M2[1,2] = (2 * self.layers[couche+1].poisson + m * self.layers[couche].lb) * F[couche+1]
+            M2[2,2] = (1 + m * self.layers[couche].lb) * R[couche] * F[couche+1]
+            M2[3,2] = -(2 - 4 * self.layers[couche+1].poisson - m * self.layers[couche].lb) * R[couche] * F[couche+1]
+            
+            M2[0,3] = 1 - 2 * self.layers[couche+1].poisson + m * self.layers[couche].lb
+            M2[1,3] = (2 * self.layers[couche+1].poisson - m * self.layers[couche].lb)
+            M2[2,3] = -(1 - m * self.layers[couche].lb) * R[couche]
+            M2[3,3] = -(2 - 4 *self.layers[couche+1].poisson + m * self.layers[couche].lb) * R[couche]
+            
+            MM2.append(M2)
+        
+    
+            
+            
+            #  calcul de M
+                
+            try :
+                                
+                
+                M_ = np.linalg.solve(M1, M2)     
+                M.append(M_)
+                
+            except :
+                a= np.linalg.det(M2) 
+                texte = f'Le déterminant de M2 pour la couche {couche+1} vaut {a}'
+                M.append(texte)
+            
+
+        ''' --------------------------------------- '''
+        ''' calcul de la matrice de l'équation B.15 '''
+        
+
+        MM = np.identity(4, dtype=np.float64)
+            
+        for i in range (n-2):
+            if type(M[i])=='string':
+                pass
+            MM=np.dot(MM, M[i])
+
+        # MM est une matrice 4x4, il faut la réduire à une 4x2 pour trouver celle de l'équation B.15
+        # toutes les lignes mais uniquement les colonnes 2(1 pour np) et 4 (3 pour np)
+
+        ixgrid = np.ix_([0,1,2,3], [1, 3])
+        MM=MM[ixgrid] # récupère le tableau 4x2 avec toutes les lignes et les colonnes 2 et 4
+
+
+
+        return M, MM
+
+    def ABCD (self, M, MM, m) :
+
+        n = len(self.layers)
+        ''' --------------------------------------- '''
+        ''' calcul des valeurs An, Bn, Cn et Dn '''
+        
+        
+        
+        b11 = math.exp(-self.layers[0].lb * m)
+        b21 = math.exp(-self.layers[0].lb * m)
+        b12 = 1
+        b22 = -1
+
+        
+        
+        c11 = -(1 - 2 * self.layers[0].poisson) * math.exp(-m * self.layers[0].lb)
+        c21 = 2 * self.layers[0].poisson * math.exp(-m * self.layers[0].lb)
+        c12 = 1 - 2 * self.layers[0].poisson
+        c22 = 2 * self.layers[0].poisson
+        
+        
+        
+        
+        k11 = b11 * MM[0,0] + b12 * MM[1,0] + c11 * MM[2,0] + c12 * MM[3,0]
+        k12 = b11 * MM[0,1] + b12 * MM[1,1] + c11 * MM[2,1] + c12 * MM[3,1]
+        k21 = b21 * MM[0,0] + b22 * MM[1,0] + c21 * MM[2,0] + c22 * MM[3,0]
+        k22 = b21 * MM[0,1] + b22 * MM[1,1] + c21 * MM[2,1] + c22 * MM[3,1]
+        
+        
+        ''' calculs de Bn et Dn avec division par 1exx de k pour éviter overflow '''
+        
+        p_k11=round(math.log10(abs(k11)),0)
+        p_k12=round(math.log10(abs(k12)),0)
+        p_k21=round(math.log10(abs(k21)),0)
+        p_k22=round(math.log10(abs(k22)),0)
+
+        p_=min(p_k11, p_k12, p_k21, p_k22)
+
+        p_ = 10**p_
+
+        k11= k11 / p_
+        k12= k12 / p_
+        k21= k21 / p_
+        k22= k22 / p_
+
+        
+
+        A=np.zeros(4,dtype=np.float64)
+        B=np.zeros(4,dtype=np.float64)
+        C=np.zeros(4,dtype=np.float64)
+        D=np.zeros(4,dtype=np.float64)
+
+        
+
+        A[n-2] = 0
+        B[n-2] = k22 / (k11 * k22 - k12 * k21) * (1/p_)
+        C[n-2] = 0
+        D[n-2] = 1 / (k12 - k22 * k11 / k21) * (1/p_)
+        
+        for i in reversed(range(n-2)):
+            
+                
+            vnp = np.vstack((A[i+1], B[i+1], C[i+1], D[i+1]))
+
+            print ('Class')
+            print (f'couche {i}')
+            print (vnp)
+            print (M[i])
+            print()
+
+                  
+            BC = np.dot(M[i], vnp)
+            
+                
+            A[i]=BC[0]
+            B[i]=BC[1]
+            C[i]=BC[2]
+            D[i]=BC[3]
+
+        ABCD = []
+        ABCD.append(A)
+        ABCD.append(B)
+        ABCD.append(C)
+        ABCD.append(D)
+        
+
+        return ABCD
+    
+    def soll_star(self, ABCD, m, z_points, r_point, c_points ) :
+        #initialisation de la variable de rendu
+        # la variable de rendu est un dictionnaire
+        
+        A = ABCD[0]
+        B = ABCD[1]
+        C = ABCD[2]
+        D = ABCD[3]
+
+
+        response = {'s_z*' : [], 's_t*' : [], 's_r*' : [], 't_rz*' : [], 'w*' : [], 'u*' : []}
+        
+
+        H = self.htot()
+        rho=r_point/H
+        
+        for i, zz in enumerate(z_points): # boucle sur les z
+            
+            n = len (self.layers)
+
+            lmm = zz/H
+            ii = c_points[i]
+        
+            # ajout d'uen couche virtuelle en fin de structure pour éviter
+            # les erreurs sur la première couche => lb (i-1) = lb (-1) = 0
+            #lb.append(0) # permet d'éviter les erreurs sur la première couche => lb (i-1) = lb (-1) = 0
+
+            virtual_l = layer()
+            virtual_l.define('virtual', None, None, None, None, n)
+            virtual_l.lb = 0
+            self.layers.append(virtual_l)
+            
+
+
+            # pour gérer rho = 0 pour sigma t et sigma r            
+
+            if rho == 0 :
+                COEF1 = m/2 # reste à vérifier car vu nulle part !
+            else :
+                COEF1 = j1(m * rho) / rho            
+
+
+            # sigma z
+            
+                
+            sigma_z = -m * j0(m * rho) * ((A[ii] - C[ii] * (1 - 2 * self.layers[ii].poisson - m * lmm)) * math.exp(-m * (self.layers[ii].lb - lmm)) 
+                                        + (B[ii] + D[ii] * (1 - 2 * self.layers[ii].poisson + m * lmm)) * math.exp(-m * (lmm - self.layers[ii - 1].lb))) 
+
+            # sigma t
+                        
+                        
+            sigma_t = COEF1 * ((A[ii] + C[ii] * (1 + m * lmm)) * math.exp(-m * (self.layers[ii].lb - lmm)) + (B[ii] - D[ii] * (1 - m * lmm)) * math.exp(-m * (lmm - self.layers[ii - 1].lb))) + 2 * self.layers[ii].poisson * m * j0(m * rho) * (C[ii] * math.exp(-m * (self.layers[ii].lb - lmm)) - D[ii] * math.exp(-m * (lmm - self.layers[ii - 1].lb)))
+            
+                
+            # sigma r
+            
+            sigma_r = (m * j0( m * rho) - COEF1) * ((A[ii] + C[ii] * (1 + m * lmm)) * math.exp(-m * (self.layers[ii].lb - lmm)) + (B[ii] - D[ii] * (1 - m * lmm)) * math.exp(-m * (lmm - self.layers[ii-1].lb))) + 2 * self.layers[ii].poisson * m * j0( m * rho) * (C[ii] * math.exp(-m * (self.layers[ii].lb - lmm)) - D[ii] * math.exp(-m * (lmm - self.layers[ii - 1].lb)))
+
+            
+            
+            
+            # tau rz
+            
+            tau_rz = m * j1( m * rho) * ((A[ii] + C[ii] * (2 * self.layers[ii].poisson + m * lmm)) * math.exp(-m * (self.layers[ii].lb - lmm)) - (B[ii] - D[ii] * (2 * self.layers[ii].poisson - m * lmm)) * math.exp(-m * (lmm - self.layers[ii - 1].lb)))
+            
+            # w 
+            
+            w = -H*(1 + self.layers[ii].poisson) / self.layers[ii].module * j0( m * rho) * ((A[ii] - C[ii] * (2 - 4 * self.layers[ii].poisson - m * lmm)) * math.exp(-m * (self.layers[ii].lb - lmm)) - (B[ii] + D[ii] * (2 - 4 * self.layers[ii].poisson + m * lmm)) * math.exp(-m * (lmm - self.layers[ii - 1].lb)))         
+            
+            # u 
+            
+            u = H*(1 + self.layers[ii].poisson) / self.layers[ii].module * j1( m * rho) * ((A[ii] + C[ii] * (1 + m * lmm)) * math.exp(-m * (self.layers[ii].lb - lmm)) + (B[ii] - D[ii] * (1 - m * lmm)) * math.exp(-m * (lmm - self.layers[ii - 1].lb)))
+
+            response['s_z*'].append(sigma_z)
+            response['s_t*'].append(sigma_t)
+            response['s_r*'].append(sigma_r)
+            response['t_rz*'].append(tau_rz)
+            response['w*'].append(w)
+            response['u*'].append(u)
+
+                
+        # fin de boucle z
+
+        
+        return response
+        
+        
+        
+    def soll_star_unique(self, ABCD, m, z_point, c_point, rho) :
+        # args
+        #   ABCD = coefficent A B C et D pour les n couches et ue valeur de m (i.e. de r)
+        #   m = borne d'intégration
+        #   z_point = profondeur du point calculé
+        #   c_point = indice de la couche dans laquelle se situe z_point
+        #   rho = r_point / H 
+        # return
+        #   dictionnaire des sollicitations* pour un r et un z donné, et une valeur de m
+        #   {'s_z*' : [], 's_t*' : [], 's_r*' : [], 't_rz*' : [], 'w*' : [], 'u*' : []}
+
+
+
+        #initialisation de la variable de rendu
+        # la variable de rendu est un dictionnaire
+        
+        A = ABCD[0]
+        B = ABCD[1]
+        C = ABCD[2]
+        D = ABCD[3]
+
+
+        response = {'s_z*' : [], 's_t*' : [], 's_r*' : [], 't_rz*' : [], 'w*' : [], 'u*' : []}
+        
+
+        H = self.htot()
+        #rho=r_point/H # à passer en argument
+                       
+        n = len (self.layers)
+
+        lmm = z_point/H
+        ii = c_point
+    
+        # ajout d'uen couche virtuelle en fin de structure pour éviter
+        # les erreurs sur la première couche => lb (i-1) = lb (-1) = 0
+        if ii == 0 :
+            virtual_l = layer()
+            virtual_l.define('virtual', None, None, None, None, n)
+            virtual_l.lb = 0
+            self.layers.append(virtual_l)
+        
+
+
+        # pour gérer rho = 0 pour sigma t et sigma r            
+
+        if rho == 0 :
+            COEF1 = m/2 # reste à vérifier car vu nulle part !
+        else :
+            COEF1 = j1(m * rho) / rho            
+
+
+        # sigma z
+        
+            
+        sigma_z = -m * j0(m * rho) * ((A[ii] - C[ii] * (1 - 2 * self.layers[ii].poisson - m * lmm)) * math.exp(-m * (self.layers[ii].lb - lmm)) 
+                                    + (B[ii] + D[ii] * (1 - 2 * self.layers[ii].poisson + m * lmm)) * math.exp(-m * (lmm - self.layers[ii - 1].lb))) 
+
+        # sigma t
+                    
+                    
+        sigma_t = COEF1 * ((A[ii] + C[ii] * (1 + m * lmm)) * math.exp(-m * (self.layers[ii].lb - lmm)) + (B[ii] - D[ii] * (1 - m * lmm)) * math.exp(-m * (lmm - self.layers[ii - 1].lb))) + 2 * self.layers[ii].poisson * m * j0(m * rho) * (C[ii] * math.exp(-m * (self.layers[ii].lb - lmm)) - D[ii] * math.exp(-m * (lmm - self.layers[ii - 1].lb)))
+        
+            
+        # sigma r
+        
+        sigma_r = (m * j0( m * rho) - COEF1) * ((A[ii] + C[ii] * (1 + m * lmm)) * math.exp(-m * (self.layers[ii].lb - lmm)) + (B[ii] - D[ii] * (1 - m * lmm)) * math.exp(-m * (lmm - self.layers[ii-1].lb))) + 2 * self.layers[ii].poisson * m * j0( m * rho) * (C[ii] * math.exp(-m * (self.layers[ii].lb - lmm)) - D[ii] * math.exp(-m * (lmm - self.layers[ii - 1].lb)))
+
+        
+        
+        
+        # tau rz
+        
+        tau_rz = m * j1( m * rho) * ((A[ii] + C[ii] * (2 * self.layers[ii].poisson + m * lmm)) * math.exp(-m * (self.layers[ii].lb - lmm)) - (B[ii] - D[ii] * (2 * self.layers[ii].poisson - m * lmm)) * math.exp(-m * (lmm - self.layers[ii - 1].lb)))
+        
+        # w 
+        
+        w = -H*(1 + self.layers[ii].poisson) / self.layers[ii].module * j0( m * rho) * ((A[ii] - C[ii] * (2 - 4 * self.layers[ii].poisson - m * lmm)) * math.exp(-m * (self.layers[ii].lb - lmm)) - (B[ii] + D[ii] * (2 - 4 * self.layers[ii].poisson + m * lmm)) * math.exp(-m * (lmm - self.layers[ii - 1].lb)))         
+        
+        # u 
+        
+        u = H*(1 + self.layers[ii].poisson) / self.layers[ii].module * j1( m * rho) * ((A[ii] + C[ii] * (1 + m * lmm)) * math.exp(-m * (self.layers[ii].lb - lmm)) + (B[ii] - D[ii] * (1 - m * lmm)) * math.exp(-m * (lmm - self.layers[ii - 1].lb)))
+
+        response['s_z*'].append(sigma_z)
+        response['s_t*'].append(sigma_t)
+        response['s_r*'].append(sigma_r)
+        response['t_rz*'].append(tau_rz)
+        response['w*'].append(w)
+        response['u*'].append(u)
+
+        if ii == 0 :
+            del self.layers[-1]
+            virtual_l = None  
+        
+        return response
+    
+    # --------------------------------------
+    #  METHODES POUR DETERMINATION DES POINTS DE CALCULS
+    # --------------------------------------
+
+    def gen_z_points (self) :
+        th = []
+        for l in self.layers :
+            th.append(l.thickness)
+        th = th[0:-1] # on enleve l'apaisseur de la dernier couche (substratum)
+        
+        c = 0.000001
+        th=np.array(th)    
+        z=[]
+        for i in range (len(th)) :
+            z.append(np.sum(th[0:i+1]))
+        
+        z=np.array(z)
+        
+        zp1=np.array(z)
+        zp2=np.array(z) + c
+        zp0=np.array([0])
+        
+        zp = np.hstack ((zp1, zp2, zp0))
+        zp=np.sort(zp)
+
+        self.z_points = zp    
+
+    def gen_c_points(self, z_points) :
+        th = []
+        for l in self.layers :
+            th.append(l.thickness)
+        th = th[0:-1] # on enleve l'apaisseur de la dernier couche (substratum)
+        
+        # calcul de z(i) 
+
+        th=np.array(th)    
+        z=[]
+        for i, e in enumerate(th) :
+
+            z.append(np.sum(th[0:i+1]))
+        
+        z=np.array(z)
+
+
+        # calcul de c_points (indice de couches pour les z_points)
+                    
+        znp=np.hstack(([-0.0001],z))
+        
+        c_points=[]
+
+        for i, zz in enumerate(z_points):
+            couche = len(np.where(zz > znp)[0])-1
+            c_points.append(couche)
+
+        self.c_points =  c_points
+
+
