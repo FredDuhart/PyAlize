@@ -39,36 +39,51 @@ for l in struct.layers :
 
 # chargement
 
-load = load()
+load_ = load()
 print ('---- paramètres de charge -------')
 type = 'roue simple'
-if load.disj >0 : type ='jumelage'
+if load_.disj >0 : type ='jumelage'
 print (f'type = {type}')
-print ('q (MPa) = ', load.load)
-print ('rayon (m) = ', load.radius)
+print ('q (MPa) = ', load_.load)
+print ('rayon (m) = ', load_.radius)
 
 
 
 # paramètres de calcul
 
-params = calc_params(struct)
+params = calc_params(struct, load_)
 
-params.r_points = [0, 0.2]
+params.define_r_points ([0, 0.2])
 
 
 print ('---- paramètres de calcul -------')
 print ('z_point ' , params.z_points)
 print ('c_points ', params.c_points)
 print ('r_points ', params.r_points)
+print()
+print ('valeurs de m')
+mm = params.mValues
+print (f'il y a {len(mm)} colonnes de calcul')
+for m in mm :
+    print (m)
+
+
+
+
+# test 
+
+m = 9.93198623e-02
+
+
+
+
+
 
 # Calculs
 print ('------------ CALCULS --------------')
 print()
 
-resultats = calculation(struct, params, load)
+resultats = calculation(struct, params, load_)
 
-print ('valeurs de m')
-mm = resultats.mValues
-print (f'il y a {len(mm)}')
-for m in mm :
-    print (m)
+print (resultats.final_results)
+
