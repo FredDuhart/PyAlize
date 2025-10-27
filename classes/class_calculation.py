@@ -80,9 +80,10 @@ class calculation :
 
         return F
        
-    def MMMM (self, R, F, m) : #all bonded
+    def MMMM (self, R_, F, m) : #all bonded
             
         n = len (self.layers)
+        
         ''' --------------------------------------- '''
         ''' calcul des matrices de l'équation B.11 '''
 
@@ -91,6 +92,8 @@ class calculation :
         M=[]
         
         for couche in range(n-2): # toutes les couches sauf le substratum
+
+            
 
             s=(4,4)
             M1 = np.zeros(s, dtype=np.float64)
@@ -125,23 +128,23 @@ class calculation :
         
             M2[0,0] = F[couche+1]
             M2[1,0] = F[couche+1]
-            M2[2,0] = R[couche] * F[couche+1]
-            M2[3,0] = R[couche] * F[couche+1]
+            M2[2,0] = R_[couche] * F[couche+1]
+            M2[3,0] = R_[couche] * F[couche+1]
 
             M2[0,1] = 1
             M2[1,1] = -1
-            M2[2,1] = R[couche]
-            M2[3,1] =-R[couche]
+            M2[2,1] = R_[couche]
+            M2[3,1] = -R_[couche]
 
             M2[0,2] = -(1 - 2 * self.layers[couche+1].poisson - m * self.layers[couche].lb) * F[couche+1]
             M2[1,2] = (2 * self.layers[couche+1].poisson + m * self.layers[couche].lb) * F[couche+1]
-            M2[2,2] = (1 + m * self.layers[couche].lb) * R[couche] * F[couche+1]
-            M2[3,2] = -(2 - 4 * self.layers[couche+1].poisson - m * self.layers[couche].lb) * R[couche] * F[couche+1]
+            M2[2,2] = (1 + m * self.layers[couche].lb) * R_[couche] * F[couche+1]
+            M2[3,2] = -(2 - 4 * self.layers[couche+1].poisson - m * self.layers[couche].lb) * R_[couche] * F[couche+1]
             
             M2[0,3] = 1 - 2 * self.layers[couche+1].poisson + m * self.layers[couche].lb
             M2[1,3] = (2 * self.layers[couche+1].poisson - m * self.layers[couche].lb)
-            M2[2,3] = -(1 - m * self.layers[couche].lb) * R[couche]
-            M2[3,3] = -(2 - 4 *self.layers[couche+1].poisson + m * self.layers[couche].lb) * R[couche]
+            M2[2,3] = -(1 - m * self.layers[couche].lb) * R_[couche]
+            M2[3,3] = -(2 - 4 *self.layers[couche+1].poisson + m * self.layers[couche].lb) * R_[couche]
             
             MM2.append(M2)
         
@@ -277,7 +280,7 @@ class calculation :
         response = {'s_z*' : [], 's_t*' : [], 's_r*' : [], 't_rz*' : [], 'w*' : [], 'u*' : []}
         
 
-        H = self.htot()
+        H = self.struct.htot()
         rho=r_point/H
 
         n = len (self.layers)
@@ -292,11 +295,12 @@ class calculation :
             # ajout d'uen couche virtuelle en fin de structure pour éviter
             # les erreurs sur la première couche => lb (i-1) = lb (-1) = 0
             #lb.append(0) # permet d'éviter les erreurs sur la première couche => lb (i-1) = lb (-1) = 0
-
-            virtual_l = layer()
-            virtual_l.define('virtual', None, None, None, None, n)
-            virtual_l.lb = 0
-            self.layers.append(virtual_l)
+            if ii == 0 :
+                virtual_l = layer()
+                virtual_l.define('virtual', None, None, None, None, n)
+                virtual_l.lb = 0
+                self.layers.append(virtual_l)
+            
             
 
 
@@ -345,6 +349,11 @@ class calculation :
             response['t_rz*'].append(tau_rz)
             response['w*'].append(w)
             response['u*'].append(u)
+
+            if ii == 0 :
+                del self.layers[-1]
+                virtual_l = None  
+
 
                 
         # fin de boucle z
@@ -449,61 +458,6 @@ class calculation :
         
         return response
     
-    # --------------------------------------
-    #  METHODES POUR DETERMINATION DES POINTS DE CALCULS
-    # --------------------------------------
-
-    def gen_z_points (self) :
-        th = []
-        for l in self.layers :
-            th.append(l.thickness)
-        th = th[0:-1] # on enleve l'apaisseur de la dernier couche (substratum)
-        
-        c = 0.000001
-        th=np.array(th)    
-        z=[]
-        for i in range (len(th)) :
-            z.append(np.sum(th[0:i+1]))
-        
-        z=np.array(z)
-        
-        zp1=np.array(z)
-        zp2=np.array(z) + c
-        zp0=np.array([0])
-        
-        zp = np.hstack ((zp1, zp2, zp0))
-        zp=np.sort(zp)
-
-        self.z_points = zp    
-
-    def gen_c_points(self, z_points) :
-        th = []
-        for l in self.layers :
-            th.append(l.thickness)
-        th = th[0:-1] # on enleve l'apaisseur de la dernier couche (substratum)
-        
-        # calcul de z(i) 
-
-        th=np.array(th)    
-        z=[]
-        for i, e in enumerate(th) :
-
-            z.append(np.sum(th[0:i+1]))
-        
-        z=np.array(z)
-
-
-        # calcul de c_points (indice de couches pour les z_points)
-                    
-        znp=np.hstack(([-0.0001],z))
-        
-        c_points=[]
-
-        for i, zz in enumerate(z_points):
-            couche = len(np.where(zz > znp)[0])-1
-            c_points.append(couche)
-
-        self.c_points =  c_points
 
     # --------------------------------------
     #  METHODE FINALE
@@ -605,6 +559,7 @@ class calculation :
         #    on en calcule pas F(i) car dépendant de la valeur de m 
         
         R_ = self.R()
+        #print("R mat = ", R_)
         
         # calcul de alpha
         
@@ -615,11 +570,6 @@ class calculation :
         '''
         
 
-        ############################################ ON EST ICI #######################################
-        # il faut revoir la liste des m !!!!!!
-
-
-
         response = {'s_z' : [], 's_t' : [], 's_r' : [], 't_rz' : [], 'w' : [], 'u' : [], 'e_z' : [], 'e_t' : [], 'e_r' : [], 'E' : []}
         
         for i , rr in enumerate( r_points) :
@@ -627,7 +577,7 @@ class calculation :
             # calcul des points d'intégration
             
             l_quad_r=self.params.mValues[i] #list_quad_m (a, rr, H, iteration)
-            print(l_quad_r)
+            #print(l_quad_r)
                       
             # -------   Boucle sur les valeurs d'intégration   -------
             
@@ -654,7 +604,7 @@ class calculation :
             # boucle
             for k, couple_m in enumerate(l_quad_r) :
                 
-                print (f'itération n°{k}')
+                #print (f'itération n°{k}')
 
                 m=couple_m[0]
                 poids_m = couple_m[1]
@@ -666,7 +616,7 @@ class calculation :
                                 
                     try :                                       
                         
-                        print('Calcul optimisé')
+                        #print('Calcul optimisé')
 
                         Fm = self.F_m(m)
                         M, MM = self.MMMM(R_, Fm, m)
@@ -684,7 +634,7 @@ class calculation :
                 if isb.sum() != len (isb) : # cas ou toutes les interfaces ne sont pas collées
                                 
                     try :                                       
-                        print('calcul complet') 
+                        #print('calcul complet') 
                         Fm = self.F_m(m)
                         M, MM = self.MMMM(R_, Fm, M)
                         ABCD = self.ABCD(M, MM, m)

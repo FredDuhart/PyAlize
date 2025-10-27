@@ -70,18 +70,8 @@ for m in mm :
 
 
 
-# test 
-
-m = 9.93198623e-02
-
-
-
-
-
-
 # Calculs
-print ('------------ CALCULS --------------')
-print()
+
 
 resultats = calculation(struct, params, load_)
 
