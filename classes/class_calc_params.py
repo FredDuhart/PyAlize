@@ -24,8 +24,8 @@ class calc_params :
         self.load = load
         
         # points de calcul
-        self.z_points=self.gen_z_points()
-        self.c_points=self.gen_c_points()
+        self.gen_z_points()
+        self.gen_c_points()
         self.r_points=None
 
         # points d'intégration
@@ -53,18 +53,36 @@ class calc_params :
         
         c = 0.000001
 
-        zp1=np.array(z)    
+        zp1=np.array(z)
         zp2=np.array(z) + c
         zp0=np.array([0])
         
         zp = np.hstack ((zp1, zp2, zp0))
         zp=np.sort(zp)
 
-        return zp
+        self.z_points = zp
+        
     
+    def add_z_points (self, distance) :
+        # ajoute des points de calculs tous les (distance) mètres
+
+        z_max = self.z_points.max()
+
+        z_comp = np.arange (0, z_max, distance)
+
+        z_comp = np.array(z_comp)
+
+        z_comp = np.hstack((self.z_points, z_comp))
+        z_comp =np.unique(z_comp)
+        z_comp = np.sort(z_comp)
+        
+        self.z_points = z_comp
+        self.gen_c_points()
+   
           
 
     def gen_c_points(self) :
+
         if self.z_points is not None :
         
             
@@ -86,7 +104,7 @@ class calc_params :
                 couche = len(np.where(zz > znp)[0])-1
                 c_points.append(couche)
 
-            return  c_points
+            self.c_points = c_points
 
 
 

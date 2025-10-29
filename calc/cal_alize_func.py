@@ -114,8 +114,8 @@ def calc_alize_jum (data, file) :
     
     ### définition de la structure
     try :
-        th=data['th']
-        thnp=np.array(th)
+        th = data['th']
+        thnp = np.array(th)
         E = data['E']
         nu = data['nu']
         isbonded = data['inter']
@@ -247,7 +247,7 @@ def calc_alize_rouesimple (data, file) :
     
     ### iteration 
     
-    it = 50
+    it = 25
     
     ### calcul
     
@@ -314,4 +314,38 @@ def calc_alize_rouesimple (data, file) :
     
     df_alize.to_excel(file_output)
     
-    return 'Calcul correctement effectué'
+    return df_alize #, 'Calcul correctement effectué'
+
+
+if __name__ == "__main__" :
+
+    #data structure
+    data = {'th' : [0.06, 0.10, 0.12],
+            'E' : [7000, 10000, 12000, 50],
+            'nu' : [0.35, 0.35, 0.35, 0.35],
+            'inter' : [1,1,1]}
+    
+    file = "C:/Users/f.duhart/Downloads/toto.xlsx"
+
+    res =  calc_alize_rouesimple(data, file)
+
+    print (res)
+
+
+    import matplotlib.pyplot as plt
+
+    solls = ['s_z', 's_t', 's_r', 't_rz', 'w', 'u', 'e_z', 'e_t', 'e_r', 'E']
+
+    soll = 'e_z'
+    X = res[soll]
+
+    
+    Y = res['Profondeur']
+    
+
+    fig, ax = plt.subplots(figsize=(6,6))
+
+    fig.suptitle (f'sollicitations {soll}')
+    ax.plot(X, Y, linewidth=2.0, color='red', alpha = 1)
+
+    plt.show()

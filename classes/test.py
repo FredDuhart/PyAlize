@@ -53,7 +53,9 @@ print ('rayon (m) = ', load_.radius)
 
 params = calc_params(struct, load_)
 
-params.define_r_points ([0, 0.2])
+params.add_z_points(0.02)
+
+params.define_r_points ([0])
 
 
 print ('---- paramètres de calcul -------')
@@ -64,8 +66,8 @@ print()
 print ('valeurs de m')
 mm = params.mValues
 print (f'il y a {len(mm)} colonnes de calcul')
-for m in mm :
-    print (m)
+
+
 
 
 
@@ -74,6 +76,26 @@ for m in mm :
 
 
 resultats = calculation(struct, params, load_)
+res = resultats.final_results
 
-print (resultats.final_results)
+print (res)
 
+# représentation
+
+import matplotlib.pyplot as plt
+
+solls = ['s_z', 's_t', 's_r', 't_rz', 'w', 'u', 'e_z', 'e_t', 'e_r', 'E']
+
+soll = 's_z'
+X = np.hstack(res[soll])
+
+print (X)
+
+Y = params.z_points
+
+fig, ax = plt.subplots(figsize=(6,6))
+
+fig.suptitle (f'sollicitations {soll}')
+ax.plot(X, -Y, linewidth=2.0, color='red', alpha = 1)
+
+plt.show()

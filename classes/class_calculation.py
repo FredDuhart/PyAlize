@@ -73,7 +73,7 @@ class calculation :
         ''' F[i]  pour i=1 to n-1-1 '''
         ''' equations B.12a et B.12b '''
         
-        for i in range (n-2):
+        for i in range (n-1):
             Fi = math.exp(-m* (self.layers[i+1].lb-self.layers[i].lb))
             F.append(Fi)
                 
@@ -87,11 +87,13 @@ class calculation :
         ''' --------------------------------------- '''
         ''' calcul des matrices de l'équation B.11 '''
 
+
+
         MM1=[]
         MM2=[]
         M=[]
         
-        for couche in range(n-2): # toutes les couches sauf le substratum
+        for couche in range(n-1): # toutes les couches sauf le substratum
 
             
 
@@ -171,7 +173,7 @@ class calculation :
 
         MM = np.identity(4, dtype=np.float64)
             
-        for i in range (n-2):
+        for i in range (n-1):
             if type(M[i])=='string':
                 pass
             MM=np.dot(MM, M[i])
@@ -192,7 +194,7 @@ class calculation :
         ''' --------------------------------------- '''
         ''' calcul des valeurs An, Bn, Cn et Dn '''
         
-        
+      
         
         b11 = math.exp(-self.layers[0].lb * m)
         b21 = math.exp(-self.layers[0].lb * m)
@@ -233,19 +235,19 @@ class calculation :
 
         
 
-        A=np.zeros(4,dtype=np.float64)
-        B=np.zeros(4,dtype=np.float64)
-        C=np.zeros(4,dtype=np.float64)
-        D=np.zeros(4,dtype=np.float64)
+        A=np.zeros(n,dtype=np.float64)
+        B=np.zeros(n,dtype=np.float64)
+        C=np.zeros(n,dtype=np.float64)
+        D=np.zeros(n,dtype=np.float64)
 
         
 
-        A[n-2] = 0
-        B[n-2] = k22 / (k11 * k22 - k12 * k21) * (1/p_)
-        C[n-2] = 0
-        D[n-2] = 1 / (k12 - k22 * k11 / k21) * (1/p_)
+        A[n-1] = 0
+        B[n-1] = k22 / (k11 * k22 - k12 * k21) * (1/p_)
+        C[n-1] = 0
+        D[n-1] = 1 / (k12 - k22 * k11 / k21) * (1/p_)
         
-        for i in reversed(range(n-2)):
+        for i in reversed(range(n-1)):
             
                 
             vnp = np.vstack((A[i+1], B[i+1], C[i+1], D[i+1]))
@@ -271,10 +273,13 @@ class calculation :
         #initialisation de la variable de rendu
         # la variable de rendu est un dictionnaire
         
+
         A = ABCD[0]
         B = ABCD[1]
         C = ABCD[2]
         D = ABCD[3]
+        
+      
 
 
         response = {'s_z*' : [], 's_t*' : [], 's_r*' : [], 't_rz*' : [], 'w*' : [], 'u*' : []}
@@ -651,7 +656,7 @@ class calculation :
                 
                 # Récupération des valeurs pour itréation - 1           
                 
-                if k == (k_max)-4 : 
+                if k == (k_max)-4 : # 4 car les intervalles d'intégrations sont divisés en 4
                     sig_z_0 = sig_z
                     sig_t_0 = sig_t
                     sig_r_0 = sig_r

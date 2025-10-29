@@ -74,6 +74,11 @@ def R_star(n, H, z, lb , R , E, nu, isbonded, m, z_points, rr, c_points):
     ''' --------------------------------------- '''
     ''' calcul des matrices de l'équation B.11 '''
 
+    """ print (f'pour m = {m} ----------- R_ et Fm ---------')
+    print (R)
+    print (F) """
+
+
     MM1=[]
     MM2=[]
     M=[]
@@ -169,7 +174,7 @@ def R_star(n, H, z, lb , R , E, nu, isbonded, m, z_points, rr, c_points):
     ''' --------------------------------------- '''
     ''' calcul des valeurs An, Bn, Cn et Dn '''
     
-    
+   
     
     b11 = math.exp(-lb[0] * m)
     b21 = math.exp(-lb[0] * m)
@@ -206,10 +211,10 @@ def R_star(n, H, z, lb , R , E, nu, isbonded, m, z_points, rr, c_points):
     k22= k22 / p_
 
 
-    A=np.zeros(4,dtype=np.float64)
-    B=np.zeros(4,dtype=np.float64)
-    C=np.zeros(4,dtype=np.float64)
-    D=np.zeros(4,dtype=np.float64)
+    A=np.zeros(n,dtype=np.float64)
+    B=np.zeros(n,dtype=np.float64)
+    C=np.zeros(n,dtype=np.float64)
+    D=np.zeros(n,dtype=np.float64)
 
     
 
@@ -251,6 +256,7 @@ def R_star(n, H, z, lb , R , E, nu, isbonded, m, z_points, rr, c_points):
        C[i]=BC[2]
        D[i]=BC[3]
 
+      
 
     ''' --------------------------------------- '''
     ''' calcul des sollicitations R* '''
