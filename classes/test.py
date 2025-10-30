@@ -55,17 +55,34 @@ params = calc_params(struct, load_)
 
 params.add_z_points(0.02)
 
-params.define_r_points ([0])
+params.define_r_points ([0,0.2])
 
 
-print ('---- paramètres de calcul -------')
-print ('z_point ' , params.z_points)
-print ('c_points ', params.c_points)
-print ('r_points ', params.r_points)
-print()
-print ('valeurs de m')
+#print ('---- paramètres de calcul -------')
+#print ('z_point ' , params.z_points)
+#print ('c_points ', params.c_points)
+#print ('r_points ', params.r_points)
+#print()
+#print ('valeurs de m')
 mm = params.mValues
-print (f'il y a {len(mm)} colonnes de calcul')
+#print (f'il y a {len(mm)} colonnes de calcul')
+
+
+# fonction pour générér un DataFRame par position radiale
+
+'''Colonnes
+    couche
+    nom de la couche
+    profondeur de calcul
+    E
+    nu
+    si couche suivante != interface sinon ""
+    sollicitations
+
+index des rows
+ (couche, nom de la couche, profondeur)
+
+'''
 
 
 
@@ -78,24 +95,35 @@ print (f'il y a {len(mm)} colonnes de calcul')
 resultats = calculation(struct, params, load_)
 res = resultats.final_results
 
+
+
 print (res)
 
-# représentation
 
-import matplotlib.pyplot as plt
 
-solls = ['s_z', 's_t', 's_r', 't_rz', 'w', 'u', 'e_z', 'e_t', 'e_r', 'E']
 
-soll = 's_z'
-X = np.hstack(res[soll])
 
-print (X)
+plotthis  = 0 
 
-Y = params.z_points
+if plotthis !=0 :
+        
 
-fig, ax = plt.subplots(figsize=(6,6))
+    # représentation
 
-fig.suptitle (f'sollicitations {soll}')
-ax.plot(X, -Y, linewidth=2.0, color='red', alpha = 1)
+    import matplotlib.pyplot as plt
 
-plt.show()
+    solls = ['s_z', 's_t', 's_r', 't_rz', 'w', 'u', 'e_z', 'e_t', 'e_r', 'E']
+
+    soll = 's_z'
+    X = np.hstack(res[soll])
+
+    print (X)
+
+    Y = params.z_points
+
+    fig, ax = plt.subplots(figsize=(6,6))
+
+    fig.suptitle (f'sollicitations {soll}')
+    ax.plot(X, -Y, linewidth=2.0, color='red', alpha = 1)
+
+    plt.show()
