@@ -8,6 +8,7 @@
 à documenter
 
 '''
+import pandas as pd
 import numpy as np
 import math
 from scipy.special import j0
@@ -727,4 +728,35 @@ class calculation :
             response['e_r'].append(e_r)
             response['E'].append(EE)
             
-        return response 
+            try :
+                df = self.dict_df(response)
+            except :
+                df ='erreur'
+
+        return df
+
+
+    def dict_df(self, dico) :
+
+        
+
+
+        l_conv = []
+        keys = list(dico.keys())
+
+        for key in keys :
+            cols = dico[key]
+            for i, col  in enumerate(cols) :
+                col = list(col)
+                col.insert(0,key)
+                col.insert(1,self.params.r_points[i])
+                l_conv.append(col)
+
+        l_conv_T = list(map(list, zip(*l_conv)))
+        columns = pd.MultiIndex.from_arrays(l_conv_T[:2], names=["Sollicitations", "r (m)"])
+        values = l_conv_T[2:]
+        df = pd.DataFrame(values, columns=columns)
+        df.index = pd.MultiIndex.from_arrays([self.params.c_points, self.params.z_points], names=['couche', 'z (m)'])
+
+
+        return df

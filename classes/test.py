@@ -3,6 +3,8 @@ from class_calculation import *
 from class_calc_params import *
 from class_load import load
 
+from tabulate import tabulate
+from IPython.display import display
 
 '''
 n=3
@@ -89,21 +91,116 @@ index des rows
 
 
 
+
+
+
 # Calculs
 
 
 resultats = calculation(struct, params, load_)
-res = resultats.final_results
+res  = resultats.final_results
+
+
+# uniquement pour le r=0
+
+r = 0
+res_0 = res.xs(r, axis=1, level=1)
+
+print('display')
+print(res_0.head(res_0.shape[0]))
+
+
+a = res_0.index.get_level_values("z (m)")
 
 
 
-print (res)
+
+
+def df_for_tabulate_print(df):
+    df_print = df.reset_index()
+    prev_level = [None] * df.index.nlevels
+    for irow, (idx, row) in enumerate(df.iterrows()):
+        for ilevel, level in enumerate(idx):
+            if prev_level[ilevel] == level:
+                df_print.iat[irow, ilevel] = ''
+            prev_level[ilevel] = level
+    return df_print
+
+res_0_tab = df_for_tabulate_print(res_0)
+
+print (res_0_tab.dtypes)
+print()
+print(tabulate(res_0_tab, headers='keys',  tablefmt='rounded_grid',
+               showindex=False,
+                numalign="right",
+                floatfmt=" .6f",
+                intfmt =","
+                
+               ))
+
+
+
+# swap
+print()
+df_swapped = res.copy()
+df_swapped.columns = df_swapped.columns.swaplevel(0, 1)
+df_swapped = df_swapped.sort_index(axis=1, level=0)
+
+#print(df_swapped)
+
+
+
+'''
+print()
+
+import pandas as pd
+
+
+nb_col = len (params.r_points)
+
+
+l_conv = []
+keys = list(res.keys())
+
+for key in keys :
+    cols = res[key]
+    for i, col  in enumerate(cols) :
+        col = list(col)
+        col.insert(0,key)
+        col.insert(1,params.r_points[i])
+        l_conv.append(col)
+
+l_conv_T = list(map(list, zip(*l_conv)))
+columns = pd.MultiIndex.from_arrays(l_conv_T[:2], names=["Sollicitations", "r (m)"])
+values = l_conv_T[2:]
+df = pd.DataFrame(values, columns=columns)
+df.index = pd.MultiIndex.from_arrays([params.c_points, params.z_points], names=['couche', 'z (m)'])
+
+
+print(df.head())
 
 
 
 
+
+
+   
+    
+
+
+
+print()
 
 plotthis  = 0 
+
+solls = ['s_z', 's_t', 's_r', 't_rz', 'w', 'u', 'e_z', 'e_t', 'e_r', 'E']
+soll = 's_z'
+
+r =0
+
+df_part = df[(soll, r)]
+
+
 
 if plotthis !=0 :
         
@@ -112,14 +209,12 @@ if plotthis !=0 :
 
     import matplotlib.pyplot as plt
 
-    solls = ['s_z', 's_t', 's_r', 't_rz', 'w', 'u', 'e_z', 'e_t', 'e_r', 'E']
-
-    soll = 's_z'
-    X = np.hstack(res[soll])
+    
+    X = df_part
 
     print (X)
 
-    Y = params.z_points
+    Y = df.index
 
     fig, ax = plt.subplots(figsize=(6,6))
 
@@ -127,3 +222,4 @@ if plotthis !=0 :
     ax.plot(X, -Y, linewidth=2.0, color='red', alpha = 1)
 
     plt.show()
+    '''
