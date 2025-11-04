@@ -61,20 +61,10 @@ params = calc_params(struct, load_)
 
 params.add_z_points(0.02)
 
-params.define_r_points ([0,0.2])
 
-
-
-
-
-
-
-
-
-
-
-
-
+disj =0.375 # distance entre les deux roues du jumelage
+rp=[0, disj/2, disj]
+params.define_r_points (rp)
 
 # Calculs *****************************************************
 
@@ -82,6 +72,17 @@ params.define_r_points ([0,0.2])
 resultats = calculation(struct, params, load_)
 res  = resultats.final_results
 
+
+
+#extraction des valeurs d'une seule solicitation 
+soll = 'e_r'
+res_soll = res[soll]
+
+print (res_soll)
+
+
+
+'''
 
 # uniquement pour le r=0
 r = 0
@@ -99,4 +100,4 @@ with open(output_path, "w", encoding="utf-8") as f:
     f.write(res_0_table)
 print(f"Fichier exporté sous : {output_path}")
 
-
+'''

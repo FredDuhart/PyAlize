@@ -65,14 +65,14 @@ def gen_r_points (disj) :
 def jum_soll(R, soll) :
     
     '''
-    R    : résultat du calcul R_pyalize
+    R    : résultat du calcul R_pyalize pour une charge avec plusieurs valeurs de r_points (dictionnaire)
     soll : sollicitation à extraire
     
     '''
     
         
     # extraction
-    Rsoll= extract_soll_y(R, soll)
+    Rsoll = extract_soll_y(R, soll)
         
     # symetrie et addition
     R_soll_comp = dbl_charge(Rsoll)
