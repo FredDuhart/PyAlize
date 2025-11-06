@@ -542,8 +542,8 @@ class calculation :
         for jj in c_points:
             EE.append(E[jj])
             vv.append(nu[jj])
-        EE=np.array(EE)
-        vv=np.array(vv)
+        EE=np.array(EE) # module pour la couche
+        vv=np.array(vv) # nu pour la couche
         
         
         # calcul des valeurs R(i)

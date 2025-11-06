@@ -1,4 +1,5 @@
 from tabulate import tabulate
+import numpy as np
 import textwrap
 
 # dict_mep : nom de la couche : [traduction en claire, coef_multi, format tabulate]
@@ -25,6 +26,8 @@ dict_mep = {'couche' : ['Couche', 1, ''],
                 }
 
 def mise_en_page (df) :
+
+    df = df_for_tabulate_print (df)
 
     l_champ = ['couche', 'E', 'z (m)', 's_z', 's_t', 's_r', 'w', 'u', 'e_z', 'e_t', 'e_r',]
 
@@ -56,7 +59,7 @@ def df_for_tabulate_print(df):
     for irow, (idx, row) in enumerate(df.iterrows()):
         for ilevel, level in enumerate(idx):
             if prev_level[ilevel] == level:
-                df_print.iat[irow, ilevel] = ''
+                df_print.iat[irow, ilevel] = None
             prev_level[ilevel] = level
     return df_print
 
@@ -77,8 +80,16 @@ def res_to_tabulate(df) :
     headers  = df.columns.to_list()
     headers_wrapped = [wrap_cell(h, larg) for h in headers]
 
-
-    table = tabulate(df, headers=headers_wrapped, maxcolwidths=[larg]*len(l_fmt), tablefmt='rounded_grid', showindex=False, numalign="center", floatfmt=l_fmt, intfmt ="_")
+    #df = df.replace(np.nan, None)
+    #print(df.head(20))
+    table = tabulate(df,
+                     headers=headers_wrapped, 
+                     maxcolwidths=[larg]*len(l_fmt), 
+                     tablefmt='rounded_grid', 
+                     showindex=False, 
+                     numalign="center", 
+                     floatfmt=l_fmt, intfmt ="_",
+                     missingval='tot')
     
     return table
 

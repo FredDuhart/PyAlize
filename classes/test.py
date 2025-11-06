@@ -29,13 +29,11 @@ b_layer = layer()
 c_layer = layer()
 d_layer = layer()
 a_layer.define('BB' , 0.06, 7000, 0.35, True, 0)
-b_layer.define('GB3', 0.10, 10000   , 0.35, True, 1)
-c_layer.define('GB4', 0.12, 12000, 0.35, True, 2)
+b_layer.define('GB3', 0.12, 10000   , 0.35, True, 1)
 d_layer.define('CdF', None, 50, 0.35, True,3)
 struct = structure()
 struct.add_layer(a_layer)
 struct.add_layer(b_layer)
-struct.add_layer(c_layer)
 struct.add_layer(d_layer)
 
 print(' ----------------- STRUCTURE ----------------')
@@ -63,7 +61,7 @@ params.add_z_points(0.02)
 
 
 disj =0.375 # distance entre les deux roues du jumelage
-rp=[0, disj/2, disj]
+rp=[0, disj/2, disj]#, disj/2]#, disj]
 params.define_r_points (rp)
 
 # Calculs *****************************************************
@@ -73,12 +71,52 @@ resultats = calculation(struct, params, load_)
 res  = resultats.final_results
 
 
+def res_jum (res, rr) :
+    
+    solls = ['s_z','s_t','s_r','t_rz','w','u','e_z','e_t','e_r']
+    
+    for soll in solls :
+        for i, r in enumerate(rr) :
+            res[soll, r] = res[soll, r] + res[soll, rr[-1-i]]
+        
+    res = res.drop(rr[-1], level = 1, axis=1)
+    return res
+    
+
+
+
+
 
 #extraction des valeurs d'une seule solicitation 
-soll = 'e_r'
-res_soll = res[soll]
 
-print (res_soll)
+
+table_res = res_to_tabulate(res)
+res_jumelage = res_jum(res, params.r_points)
+table_res_jum = res_to_tabulate(res_jumelage)
+
+
+for r in params.r_points :
+    
+    res_r = res.xs(r, axis=1, level=1)
+    table_res = res_to_tabulate(res_r)
+    print(f'ROUE SIMPLE --------- r ={r} ---------------------------------------------------------')
+    table_res = table_res.replace('nan', '   ')
+    print(table_res)
+
+for r in params.r_points[:-1] :
+    
+    res_r = res_jumelage.xs(r, axis=1, level=1)
+    table_res_jum = res_to_tabulate(res_r)
+    print(f'JUMELAGE --------- r ={r} ---------------------------------------------------------')
+    table_res_jum = table_res_jum.replace('nan', '   ')
+    table_res_jum = table_res_jum.replace('_', ' ')
+    print(table_res_jum)
+
+
+
+
+
+
 
 
 
