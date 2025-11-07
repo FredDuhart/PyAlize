@@ -1,10 +1,9 @@
-from class_struct import *
-from class_calculation import *
+from class_struct import structure
+from class_calculation import 
 from class_calc_params import *
 from class_load import load
 
 from tabulate import tabulate
-from IPython.display import display
 
 from class_exports import res_to_tabulate, export_results
 
