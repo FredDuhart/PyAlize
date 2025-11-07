@@ -12,12 +12,9 @@ import sys
 
 from qt_material import apply_stylesheet  # Feuille de style Material
 
-# --- Fonctions de calcul exemples ---
-def calcul1():
-    print("Calcul 1 exécuté !")
 
-def calcul2():
-    print("Calcul 2 exécuté !")
+
+
 
 
 # --- Délégué ComboBox ---
@@ -173,7 +170,12 @@ class TableStruct(QTableView):
                     for c in range(self.model.columnCount())
                 ])
 
-    def highlight_last_row(self):
+    def export_struct(self) :
+        # exporte les données sous forme d'un objet structure
+        
+        pass
+
+    def highlight_last_row(self): # pour masquer l'épaisseur et l'interface
         rc = self.model.rowCount()
         if rc == 0:
             return
@@ -340,7 +342,42 @@ class MainWindow(QMainWindow):
                     self.table._append_row(row)
         except Exception as e:
             QMessageBox.critical(self, "Erreur CSV", f"Impossible d'importer le CSV : {e}")
+    
+    # --- Fonctions de calculs ---
+    def collect_data(self) :
+        valid, erreurs = self.table.validate_data()
+        if not valid:
+            QMessageBox.warning(
+                self,
+                "Erreur de validation",
+                "Impossible de lancer les calculs :\n" + "\n".join(erreurs)
+            )
+            return
+        
+        return 'bravo'
 
+
+    def calcul1(self):
+        self.collect_data()
+
+
+        filename, _ = QFileDialog.getSaveFileName(self, "Exporter les résulats", "", "Fichiers TXT (*.txt;;Tous les fichiers (*.*)")
+        if filename:
+            try:
+                
+
+
+
+                QMessageBox.information(self, "Calculs réussis !", f"Les résulats a été exporté vers :\n{filename}")
+            except Exception as e:
+                QMessageBox.critical(self, "Erreur", f"Echec des calculs : {e}")
+        # il faut importer la classe layer et structure
+        
+
+        print("Calcul 1 exécuté !")
+
+    def calcul2(self):
+        print("Calcul 2 exécuté !")
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
