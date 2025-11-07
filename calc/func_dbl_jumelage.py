@@ -73,6 +73,8 @@ def rr_comp_gauche (res, rr, disg) :
 
 def dbl_charge (res) :
     
+    # res = tableau z_points * r_points pour une solicitation
+
     res2 = np.flip (res, axis = 1)
     res_final = res + res2
     
@@ -83,25 +85,20 @@ def extract_soll_y (res, soll):
         
     
     '''
-    res        : dictionnaire de résultats
+    res        : dictionnaire de résultats (avec plusieurs valeurs de r_points) - 
     soll       : sollicitation à extraire
         
     n_z        : nombre de z de calculs
     r_points   : liste des r de calcul (entre 0 et rmax et passant par disj)
     
-    
     '''
     r_soll = res[soll]
-    n_r = len(r_soll)    
-    n_z = len (r_soll[0])
+    n_r = len(r_soll) # nombre de r_points    
+    n_z = len (r_soll[0]) #nombre de z_points
    
     
     # extraction d'une sollicitation donnée et conversion tableau de dimensions n_z x n_r
-    
-
-        
-    tab_res=np.zeros((n_z, n_r))
-    
+    tab_res = np.zeros((n_z, n_r))
     for i in range(n_r):
         coli = r_soll[i]
         tab_res[:,i]=coli
