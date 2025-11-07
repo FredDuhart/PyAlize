@@ -17,10 +17,15 @@ Pour chaque couche il faut renseigner :
 
 # Charges
 Le modèle peut prendre en compte une charge isolée de type circulaire.
-L'outil est conçu pour répondre aaux régles françaises, c'est donc le jumelage standard qui est pris en compte dans l'interface graphique.
+L'interface graphique prpose deux cas de charegs pour l'instant :
+- uen charge unique r=0.125 Q = 0.662 MPa
+- un jumelage de deux charges (r=0.125 / Q=0.662MPa) espacées de 0.375 m
+
+# Résultats
+Les résultats sont édités sous forme d'un fichier texte.
 
 # GUI - Interface graphique
-Pour l'instant l'interface graphique est limitée à la saisie de la structure et au lancement du calucl
+Pour l'instant l'interface graphique est limitée à la saisie de la structure et au lancement du calcul.
 Reste à faire :
 - présentation des résultats
 - possibilité de choisir une autre charge de référence, voire de construire un chargement complexe...
@@ -29,9 +34,3 @@ Reste à faire :
 Seuls les cas de structures avec interfaces entièrement collées focntionnent. Une tentative d'implémentation des interfaces glissantes a été testée mais donne des résultats érronés.
 Toute aide serait la bienvenue.
 
-# Améliorations à prévoir
-- passer sous Qt
-
-
-# Remerciements
-Merci à Mostafa-Nakhaei pour son inspiration - voir son dépot gitHub https://github.com/Mostafa-Nakhaei
