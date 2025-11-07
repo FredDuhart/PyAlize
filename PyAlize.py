@@ -12,7 +12,7 @@ from tkinter import *
 import sys
 #sys.path.append('./GUI/')
 #sys.path.insert(1, './GUI')
-sys.path.append('./GUI/')
+#sys.path.append('./GUI/')
 from GUI_saisie import *
 
 # afficher

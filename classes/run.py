@@ -1,5 +1,7 @@
+
+
 from class_struct import structure
-from class_calculation import 
+from class_calculation import  *
 from class_calc_params import *
 from class_load import load
 

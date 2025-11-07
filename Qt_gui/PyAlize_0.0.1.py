@@ -11,10 +11,7 @@ import csv
 import sys
 
 from qt_material import apply_stylesheet  # Feuille de style Material
-
-
-
-
+from class_struct import structure
 
 
 # --- Délégué ComboBox ---
@@ -283,8 +280,8 @@ class MainWindow(QMainWindow):
         self.btn_remove.clicked.connect(self.table.remove_selected_row)
         self.btn_export.clicked.connect(self.export_csv)
         self.btn_import.clicked.connect(self.import_csv)
-        self.btn_calcul1.clicked.connect(calcul1)
-        self.btn_calcul2.clicked.connect(calcul2)
+        self.btn_calcul1.clicked.connect(self.calcul1)
+        self.btn_calcul2.clicked.connect(self.calcul2)
         self.btn_close.clicked.connect(self.close)
         self.table.rows_count_changed.connect(self.update_delete_button_state)
         self.update_delete_button_state(self.table.model.rowCount())
