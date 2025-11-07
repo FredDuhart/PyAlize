@@ -1,18 +1,18 @@
+import os
+import sys
+sys.path.append(os.getcwd())
 
+from classes.class_struct import structure
+from classes.class_calculation import  *
+from classes.class_calc_params import *
+from classes.class_load import load
 
-from class_struct import structure
-from class_calculation import  *
-from class_calc_params import *
-from class_load import load
-
-from tabulate import tabulate
-
-from class_exports import res_to_tabulate, export_results
+from classes.class_exports import export_results
 
 import os
 
 
-def run_roue_simple (struct) : 
+def run_roue_simple (struct, outputf) :
 
     # chargement ****************************
     disj = 0 
@@ -29,7 +29,7 @@ def run_roue_simple (struct) :
     res  = resultats.final_results
 
     # ecriture txt
-    export_results (res, load_, struct )
+    export_results (res, load_, struct , outputf)
 
 
 def res_jum (res, rr) :
@@ -55,7 +55,7 @@ def res_jum (res, rr) :
 
     return res
 
-def run_jumelage (struct) : 
+def run_jumelage (struct, outputf) :
 
     # chargement ****************************
     disj = 0.375
@@ -74,7 +74,7 @@ def run_jumelage (struct) :
     res =  res_jum(res, params.r_points)
 
     # ecriture txt
-    export_results (res, load_, struct )
+    export_results (res, load_, struct , outputf)
 
 if __name__ == "__main__" :
 

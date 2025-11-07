@@ -8,10 +8,13 @@ from PySide6.QtWidgets import (
 from PySide6.QtGui import QStandardItemModel, QStandardItem, QColor
 from PySide6.QtCore import Qt, Signal
 import csv
+import os
 import sys
+sys.path.append(os.getcwd())
 
 from qt_material import apply_stylesheet  # Feuille de style Material
-from class_struct import structure
+from classes.class_struct import structure, layer
+from classes.run import run_roue_simple, run_jumelage
 
 
 # --- Délégué ComboBox ---
@@ -102,9 +105,9 @@ class TableStruct(QTableView):
 
         # Exemple de données
         data = [
-            ["Acier", 10.0, 210000, 0.3, "Collée"],
-            ["Béton", 20.5, 30000, 0.2, "Glissante"],
-            ["Bois", 5.2, 11000, 0.35, "Collée"],
+            ["BB", 0.06, 7000, 0.35, "Collée"],
+            ["GB4", 0.13, 11000, 0.35, "Collée"],
+            ["CdF", None, 50, 0.35, "Collée"],
         ]
         for row in data:
             self._append_row(row)
@@ -169,8 +172,29 @@ class TableStruct(QTableView):
 
     def export_struct(self) :
         # exporte les données sous forme d'un objet structure
-        
-        pass
+        struct = structure()
+        for r in range(self.model.rowCount()):
+
+            nom = self.model.item(r , 0).text()
+            if r == self.model.rowCount() -1 :
+                ep = 0
+            else :
+                ep = self.model.item(r, 1).text()
+            module = self.model.item(r, 2).text()
+            nu = self.model.item(r, 3).text()
+            inter = self.model.item(r,4).text()
+            if inter == 'Collée' or inter == 'colléé' :
+                inter = True
+            else :
+                inter = False
+            a_layer = layer()
+            a_layer.define(nom, float(ep), int(module), float(nu), inter, r)
+            struct.add_layer(a_layer)
+            a_layer = None
+
+        return struct
+
+
 
     def highlight_last_row(self): # pour masquer l'épaisseur et l'interface
         rc = self.model.rowCount()
@@ -262,8 +286,8 @@ class MainWindow(QMainWindow):
         # Boutons en dessous
         bottom_layout = QHBoxLayout()
         left_bot = QHBoxLayout()
-        self.btn_calcul1 = QPushButton("Calcul 1")
-        self.btn_calcul2 = QPushButton("Calcul 2")
+        self.btn_calcul1 = QPushButton("Calcul Roue simple")
+        self.btn_calcul2 = QPushButton("Calcul Jumelage")
         left_bot.addWidget(self.btn_calcul1)
         left_bot.addWidget(self.btn_calcul2)
         bottom_layout.addLayout(left_bot)
@@ -350,39 +374,47 @@ class MainWindow(QMainWindow):
                 "Impossible de lancer les calculs :\n" + "\n".join(erreurs)
             )
             return
+
+        struct = self.table.export_struct()
+        struct.calc_struct()
         
-        return 'bravo'
+        return struct
 
 
     def calcul1(self):
-        self.collect_data()
-
-
         filename, _ = QFileDialog.getSaveFileName(self, "Exporter les résulats", "", "Fichiers TXT (*.txt;;Tous les fichiers (*.*)")
         if filename:
             try:
-                
-
+                struct = self.collect_data()
+                run_roue_simple(struct, filename)
 
 
                 QMessageBox.information(self, "Calculs réussis !", f"Les résulats a été exporté vers :\n{filename}")
             except Exception as e:
                 QMessageBox.critical(self, "Erreur", f"Echec des calculs : {e}")
-        # il faut importer la classe layer et structure
-        
 
-        print("Calcul 1 exécuté !")
+
 
     def calcul2(self):
-        print("Calcul 2 exécuté !")
+
+        filename, _ = QFileDialog.getSaveFileName(self, "Exporter les résulats", "",
+                                                  "Fichiers TXT (*.txt;;Tous les fichiers (*.*)")
+        if filename:
+            try:
+                struct = self.collect_data()
+                run_jumelage(struct, filename)
+                QMessageBox.information(self, "Calculs réussis !", f"Les résulats a été exporté vers :\n{filename}")
+            except Exception as e:
+                QMessageBox.critical(self, "Erreur", f"Echec des calculs : {e}")
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
 
     # Appliquer le thème Qt-Material
-    apply_stylesheet(app, theme="dark_teal.xml")
+    apply_stylesheet(app, theme="dark_pink.xml")
 
     window = MainWindow()
-    window.resize(950, 400)
+    window.resize(1050, 400)
     window.show()
     sys.exit(app.exec())

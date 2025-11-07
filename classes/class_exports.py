@@ -1,8 +1,14 @@
+import os
+import sys
+sys.path.append(os.getcwd())
+
 from tabulate import tabulate
-from class_struct import structure
-from class_load import load
+from classes.class_struct import structure
+from classes.class_load import load
 import textwrap
 import pandas as pd
+
+
 
 # dict_mep : nom de la couche : [traduction en claire, coef_multi, format tabulate]
 coef_epsilon = 1000000
@@ -109,7 +115,7 @@ def titre (texte) :
     return ligne_supinf + ligne_t + ligne_supinf
 
 
-def export_results (resultats,  charge : load, struct : structure, file_name = None) :
+def export_results (resultats,  charge : load, struct : structure, file_name) :
     
     '''
     resultats : DataFrame issu de la class Calculation
@@ -120,9 +126,7 @@ def export_results (resultats,  charge : load, struct : structure, file_name = N
 
     '''
 
-    file_name = "C:/Users/f.duhart/OneDrive - Département de la Gironde/Documents/06-Git/PyAlize/exports/"
-    name  = 'export.txt'
-    file_name = file_name + name
+
 
     # 
     r_points = list(resultats.columns.levels [1])

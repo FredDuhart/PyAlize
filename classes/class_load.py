@@ -1,6 +1,11 @@
 
 import numpy as np
-from class_struct import structure, layer
+
+import os
+import sys
+sys.path.append(os.getcwd())
+
+from classes.class_struct import structure, layer
 
 
 class load :

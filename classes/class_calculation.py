@@ -14,9 +14,13 @@ import math
 from scipy.special import j0
 from scipy.special import j1
 
-from class_struct import structure, layer
-from class_calc_params import calc_params
-from class_load import load
+import os
+import sys
+sys.path.append(os.getcwd())
+
+from classes.class_struct import structure, layer
+from classes.class_calc_params import calc_params
+from classes.class_load import load
 
 class calculation :
     def __init__(self, structure : structure, params : calc_params, load : load , iteration = 25):

@@ -42,12 +42,12 @@ class structure :
         self.layers : layer = []
         
 
-    def add_layer(self, alayer) :
+    def add_layer(self, alayer : layer) :
         self.layers.insert(alayer.order, alayer)
         self.calc_struct()
 
     def remove_layer(self, pos) :
-        # remove layer in pos poition 
+        # remove layer in pos position
         del self.layers[pos]
         self.calc_struct()
 

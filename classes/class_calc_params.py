@@ -10,9 +10,13 @@ et la charge
 
 
 '''
+import os
+import sys
+sys.path.append(os.getcwd())
+
 import numpy as np
-from class_struct import structure, layer
-from class_load import load
+from classes.class_struct import structure, layer
+from classes.class_load import load
 
 class calc_params :
     def __init__(self, structure : structure, load : load):
