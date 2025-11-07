@@ -99,7 +99,7 @@ def R_star_u(n, H, z, lb , R , E, nu, isbonded, m, z_points, rr, c_points):
     ''' -------------- calcul de la matrice de dimensions 4n-2 x 4n-2 -----------------
     '''
     
-    s_Mat = (4 * n  - 2 , 4 * n  )
+    s_Mat = (4 * n  - 2 , 4 * n  ) # il manquerait pas un -2 ???!!!
     Mat = np.zeros (s_Mat, dtype=np.float64)
     
     # equations B.9 ====> condtions limites à la surface
@@ -244,10 +244,10 @@ def R_star_u(n, H, z, lb , R , E, nu, isbonded, m, z_points, rr, c_points):
     
     # définition des tableau A, B, C et D
     
-    A=np.zeros(4,dtype=np.float64)
-    B=np.zeros(4,dtype=np.float64)
-    C=np.zeros(4,dtype=np.float64)
-    D=np.zeros(4,dtype=np.float64)
+    A=np.zeros(n,dtype=np.float64)
+    B=np.zeros(n,dtype=np.float64)
+    C=np.zeros(n,dtype=np.float64)
+    D=np.zeros(n,dtype=np.float64)
     
     for i in range (n) :
     
