@@ -9,6 +9,7 @@
 
 '''
 import numpy as np
+from tabulate import tabulate
 
 
 class layer :
@@ -38,15 +39,7 @@ class layer :
 class structure :
     def __init__(self):
         self.name : str = None
-        
         self.layers : layer = []
-
-
-        # points de calcul
-        self.z_points=None
-        self.c_points=None
-        self.r_points=None
-
         
 
     def add_layer(self, alayer) :
@@ -82,5 +75,36 @@ class structure :
                 if l.thickness is not None :
                     H += l.thickness
         return round(H,3)
+
+    def export_tab(self) :
+        dico_struct=[]
+        
+        for l in self.layers :
+            if l.interface : 
+                inter = 'Collée'
+            else : 
+                inter = 'Glissante'
+            dico_struct.append({'Matériau' : l.name,
+                                'Ep. (m)' : l.thickness,
+                                'E (MPA)' : l.module,
+                                'nu' : l.poisson,
+                                'Interface' : inter} )
+            
+
+        #traitement de la dernière couche
+
+        dico_struct[-1]['Interface'] = ''
+        dico_struct[-1]['Ep. (m)'] = 'Semi-infinie'
+        
+        table = tabulate(dico_struct,
+                     headers="keys", 
+                     
+                     tablefmt='rounded_grid', 
+                     showindex=True, 
+                     numalign="center", 
+        )
+
+        return table
+
 
 

@@ -557,7 +557,7 @@ class calculation :
             Boucle sur les valeurs de r_points
         '''
         
-        response = {'s_z' : [], 's_t' : [], 's_r' : [], 't_rz' : [], 'w' : [], 'u' : [], 'e_z' : [], 'e_t' : [], 'e_r' : [], 'E' : []}
+        response = {'s_z' : [], 's_t' : [], 's_r' : [], 't_rz' : [], 'w' : [], 'u' : [], 'e_z' : [], 'e_t' : [], 'e_r' : [], }
         
         for i , rr in enumerate( r_points) :
             
@@ -674,12 +674,13 @@ class calculation :
             response['e_z'].append(e_z)
             response['e_t'].append(e_t)
             response['e_r'].append(e_r)
-            response['E'].append(EE)
             
-            try :
-                df = self.dict_to_df(response)
-            except :
-                df ='erreur'
+            
+        try :
+            df = self.dict_to_df(response)
+            
+        except :
+            df ='erreur'
 
         return df
 
@@ -698,6 +699,7 @@ class calculation :
                 l_conv.append(col)
 
         l_conv_T = list(map(list, zip(*l_conv)))
+                
         columns = pd.MultiIndex.from_arrays(l_conv_T[:2], names=["Sollicitations", "r (m)"])
         values = l_conv_T[2:]
         df = pd.DataFrame(values, columns=columns)
