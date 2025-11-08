@@ -27,7 +27,7 @@ class calculation :
         self.name : str = None
         
         self.struct = structure
-        self.layers = self.struct.layers
+        #self.layers = self.struct.layers
 
         self.params = params
         self.load = load
@@ -38,14 +38,14 @@ class calculation :
     def R(self) :
         # calcul des valeurs R(i)
         
-        n = len(self.layers)
+        n = len(self.struct.layers)
 
         R=[]
         
         # R[0] -  equations B.12a et B.12b 
         
-        #R0=(E[0]/E[1])*(1+nu[1])/(1+self.layers[0].poisson)
-        R0=(self.layers[0].module/self.layers[1].module)*(1+self.layers[1].poisson)/(1+self.layers[0].poisson)
+        #R0=(E[0]/E[1])*(1+nu[1])/(1+self.struct.layers[0].poisson)
+        R0=(self.struct.layers[0].module/self.struct.layers[1].module)*(1+self.struct.layers[1].poisson)/(1+self.struct.layers[0].poisson)
         R.append(R0)
         
         # R[i] pour i=1 to n-1-1  -  equations B.12a et B.12b 
@@ -53,14 +53,14 @@ class calculation :
         for i in range (n-2):
             
             #Ri = (E[i+1]/E[i+2])*(1+nu[i+2])/(1+nu[i+1])
-            Ri = (self.layers[i+1].module/self.layers[i+2].module)*(1+self.layers[i+2].poisson)/(1+self.layers[i+1].poisson)
+            Ri = (self.struct.layers[i+1].module/self.struct.layers[i+2].module)*(1+self.struct.layers[i+2].poisson)/(1+self.struct.layers[i+1].poisson)
             R.append(Ri)
 
         return R
 
     def F_m(self,  m):
                      
-        n = len (self.layers)
+        n = len (self.struct.layers)
                         
         ''' --------------------------------------- '''
         ''' calcul des valeurs F(i)  '''
@@ -71,7 +71,7 @@ class calculation :
         ''' equations B.12a et B.12b '''
    
         #F0=math.exp(-m* (lb[0]-0))
-        F0=math.exp(-m* (self.layers[0].lb-0))
+        F0=math.exp(-m* (self.struct.layers[0].lb-0))
         F.append(F0)
         
         
@@ -79,7 +79,7 @@ class calculation :
         ''' equations B.12a et B.12b '''
         
         for i in range (n-1):
-            Fi = math.exp(-m* (self.layers[i+1].lb-self.layers[i].lb))
+            Fi = math.exp(-m* (self.struct.layers[i+1].lb-self.struct.layers[i].lb))
             F.append(Fi)
                 
 
@@ -105,7 +105,7 @@ class calculation :
         H = self.struct.htot()
         rho=r_point/H
 
-        n = len (self.layers)
+        n = len (self.struct.layers)
         
         for i, zz in enumerate(z_points): # boucle sur les z
             
@@ -121,7 +121,7 @@ class calculation :
                 virtual_l = layer()
                 virtual_l.define('virtual', None, None, None, None, n)
                 virtual_l.lb = 0
-                self.layers.append(virtual_l)
+                self.struct.layers.append(virtual_l)
             
             
 
@@ -137,33 +137,33 @@ class calculation :
             # sigma z
             
                 
-            sigma_z = -m * j0(m * rho) * ((A[ii] - C[ii] * (1 - 2 * self.layers[ii].poisson - m * lmm)) * math.exp(-m * (self.layers[ii].lb - lmm)) 
-                                        + (B[ii] + D[ii] * (1 - 2 * self.layers[ii].poisson + m * lmm)) * math.exp(-m * (lmm - self.layers[ii - 1].lb))) 
+            sigma_z = -m * j0(m * rho) * ((A[ii] - C[ii] * (1 - 2 * self.struct.layers[ii].poisson - m * lmm)) * math.exp(-m * (self.struct.layers[ii].lb - lmm)) 
+                                        + (B[ii] + D[ii] * (1 - 2 * self.struct.layers[ii].poisson + m * lmm)) * math.exp(-m * (lmm - self.struct.layers[ii - 1].lb))) 
 
             # sigma t
                         
                         
-            sigma_t = COEF1 * ((A[ii] + C[ii] * (1 + m * lmm)) * math.exp(-m * (self.layers[ii].lb - lmm)) + (B[ii] - D[ii] * (1 - m * lmm)) * math.exp(-m * (lmm - self.layers[ii - 1].lb))) + 2 * self.layers[ii].poisson * m * j0(m * rho) * (C[ii] * math.exp(-m * (self.layers[ii].lb - lmm)) - D[ii] * math.exp(-m * (lmm - self.layers[ii - 1].lb)))
+            sigma_t = COEF1 * ((A[ii] + C[ii] * (1 + m * lmm)) * math.exp(-m * (self.struct.layers[ii].lb - lmm)) + (B[ii] - D[ii] * (1 - m * lmm)) * math.exp(-m * (lmm - self.struct.layers[ii - 1].lb))) + 2 * self.struct.layers[ii].poisson * m * j0(m * rho) * (C[ii] * math.exp(-m * (self.struct.layers[ii].lb - lmm)) - D[ii] * math.exp(-m * (lmm - self.struct.layers[ii - 1].lb)))
             
                 
             # sigma r
             
-            sigma_r = (m * j0( m * rho) - COEF1) * ((A[ii] + C[ii] * (1 + m * lmm)) * math.exp(-m * (self.layers[ii].lb - lmm)) + (B[ii] - D[ii] * (1 - m * lmm)) * math.exp(-m * (lmm - self.layers[ii-1].lb))) + 2 * self.layers[ii].poisson * m * j0( m * rho) * (C[ii] * math.exp(-m * (self.layers[ii].lb - lmm)) - D[ii] * math.exp(-m * (lmm - self.layers[ii - 1].lb)))
+            sigma_r = (m * j0( m * rho) - COEF1) * ((A[ii] + C[ii] * (1 + m * lmm)) * math.exp(-m * (self.struct.layers[ii].lb - lmm)) + (B[ii] - D[ii] * (1 - m * lmm)) * math.exp(-m * (lmm - self.struct.layers[ii-1].lb))) + 2 * self.struct.layers[ii].poisson * m * j0( m * rho) * (C[ii] * math.exp(-m * (self.struct.layers[ii].lb - lmm)) - D[ii] * math.exp(-m * (lmm - self.struct.layers[ii - 1].lb)))
 
             
             
             
             # tau rz
             
-            tau_rz = m * j1( m * rho) * ((A[ii] + C[ii] * (2 * self.layers[ii].poisson + m * lmm)) * math.exp(-m * (self.layers[ii].lb - lmm)) - (B[ii] - D[ii] * (2 * self.layers[ii].poisson - m * lmm)) * math.exp(-m * (lmm - self.layers[ii - 1].lb)))
+            tau_rz = m * j1( m * rho) * ((A[ii] + C[ii] * (2 * self.struct.layers[ii].poisson + m * lmm)) * math.exp(-m * (self.struct.layers[ii].lb - lmm)) - (B[ii] - D[ii] * (2 * self.struct.layers[ii].poisson - m * lmm)) * math.exp(-m * (lmm - self.struct.layers[ii - 1].lb)))
             
             # w 
             
-            w = -H*(1 + self.layers[ii].poisson) / self.layers[ii].module * j0( m * rho) * ((A[ii] - C[ii] * (2 - 4 * self.layers[ii].poisson - m * lmm)) * math.exp(-m * (self.layers[ii].lb - lmm)) - (B[ii] + D[ii] * (2 - 4 * self.layers[ii].poisson + m * lmm)) * math.exp(-m * (lmm - self.layers[ii - 1].lb)))         
+            w = -H*(1 + self.struct.layers[ii].poisson) / self.struct.layers[ii].module * j0( m * rho) * ((A[ii] - C[ii] * (2 - 4 * self.struct.layers[ii].poisson - m * lmm)) * math.exp(-m * (self.struct.layers[ii].lb - lmm)) - (B[ii] + D[ii] * (2 - 4 * self.struct.layers[ii].poisson + m * lmm)) * math.exp(-m * (lmm - self.struct.layers[ii - 1].lb)))         
             
             # u 
             
-            u = H*(1 + self.layers[ii].poisson) / self.layers[ii].module * j1( m * rho) * ((A[ii] + C[ii] * (1 + m * lmm)) * math.exp(-m * (self.layers[ii].lb - lmm)) + (B[ii] - D[ii] * (1 - m * lmm)) * math.exp(-m * (lmm - self.layers[ii - 1].lb)))
+            u = H*(1 + self.struct.layers[ii].poisson) / self.struct.layers[ii].module * j1( m * rho) * ((A[ii] + C[ii] * (1 + m * lmm)) * math.exp(-m * (self.struct.layers[ii].lb - lmm)) + (B[ii] - D[ii] * (1 - m * lmm)) * math.exp(-m * (lmm - self.struct.layers[ii - 1].lb)))
 
             response['s_z*'].append(sigma_z)
             response['s_t*'].append(sigma_t)
@@ -173,7 +173,7 @@ class calculation :
             response['u*'].append(u)
 
             if ii == 0 :
-                del self.layers[-1]
+                del self.struct.layers[-1]
                 virtual_l = None  
 
 
@@ -183,16 +183,20 @@ class calculation :
         
         return response
         
-    def ABCD_ub(self, m) :
-         
+    def ABCD_ub(self, m, R,  l_interface) :
+        
+        '''
+        l_interface = liste des conditions d'interface [True ou False]
+        '''
+
                     
         ''' --------------------------------------- '''
         ''' calcul des valeurs F(i) dépendantes de m '''
         F=self.F_m(m)
-        R = self.R()
+        
 
         # nombre de couches
-        n = len (self.layers)    
+        n = len (self.struct.layers)    
         
         ''' -------------- calcul de la matrice de dimensions 4n-2 x 4n-2 -----------------
         '''
@@ -202,15 +206,15 @@ class calculation :
         
         # equations B.9 ====> condtions limites à la surface
         
-        Mat[0,0] = math.exp(-self.layers[0].lb * m)
-        Mat[1,0] = math.exp(-self.layers[0].lb * m)
+        Mat[0,0] = math.exp(-self.struct.layers[0].lb * m)
+        Mat[1,0] = math.exp(-self.struct.layers[0].lb * m)
         Mat[0,1] = 1
         Mat[1,1] = -1
         
-        Mat[0,2] = -(1 - 2 * self.layers[0].poisson) * math.exp(-m * self.layers[0].lb);
-        Mat[1,2] = 2 * self.layers[0].poisson * math.exp(-m * self.layers[0].lb);
-        Mat[0,3] = 1 - 2 * self.layers[0].poisson;
-        Mat[1,3] = 2 * self.layers[0].poisson;
+        Mat[0,2] = -(1 - 2 * self.struct.layers[0].poisson) * math.exp(-m * self.struct.layers[0].lb);
+        Mat[1,2] = 2 * self.struct.layers[0].poisson * math.exp(-m * self.struct.layers[0].lb);
+        Mat[0,3] = 1 - 2 * self.struct.layers[0].poisson;
+        Mat[1,3] = 2 * self.struct.layers[0].poisson;
         
         
         # equations B.11 ou B.17 ======> conditions d'interfaces de couches
@@ -224,7 +228,7 @@ class calculation :
             col = couche * 4
             
             
-            if self.layers[couche].interface :#] interface collée
+            if l_interface[couche] :#] interface collée
                             
                 # partie gauche
                 Mat[lig+0,col+0]=1
@@ -237,15 +241,15 @@ class calculation :
                 Mat[lig+2,col+1] = F[couche]
                 Mat[lig+3,col+1] = -F[couche]
                 
-                Mat[lig+0,col+2] = -(1 - 2 * self.layers[couche].poisson - m * self.layers[couche].lb)
-                Mat[lig+1,col+2] = (2 * self.layers[couche].poisson + m * self.layers[couche].lb)
-                Mat[lig+2,col+2] = 1 + m * self.layers[couche].lb
-                Mat[lig+3,col+2] = -(2 - 4 * self.layers[couche].poisson - m * self.layers[couche].lb)
+                Mat[lig+0,col+2] = -(1 - 2 * self.struct.layers[couche].poisson - m * self.struct.layers[couche].lb)
+                Mat[lig+1,col+2] = (2 * self.struct.layers[couche].poisson + m * self.struct.layers[couche].lb)
+                Mat[lig+2,col+2] = 1 + m * self.struct.layers[couche].lb
+                Mat[lig+3,col+2] = -(2 - 4 * self.struct.layers[couche].poisson - m * self.struct.layers[couche].lb)
         
-                Mat[lig+0,col+3] = (1 - 2 * self.layers[couche].poisson + m * self.layers[couche].lb) * F[couche]              
-                Mat[lig+1,col+3] = (2 * self.layers[couche].poisson - m * self.layers[couche].lb) * F[couche]
-                Mat[lig+2,col+3] = -(1 - m * self.layers[couche].lb )* F[couche]
-                Mat[lig+3,col+3] = -(2 - 4 * self.layers[couche].poisson + m * self.layers[couche].lb) * F[couche]
+                Mat[lig+0,col+3] = (1 - 2 * self.struct.layers[couche].poisson + m * self.struct.layers[couche].lb) * F[couche]              
+                Mat[lig+1,col+3] = (2 * self.struct.layers[couche].poisson - m * self.struct.layers[couche].lb) * F[couche]
+                Mat[lig+2,col+3] = -(1 - m * self.struct.layers[couche].lb )* F[couche]
+                Mat[lig+3,col+3] = -(2 - 4 * self.struct.layers[couche].poisson + m * self.struct.layers[couche].lb) * F[couche]
                 
                 
                 # partie droite
@@ -260,19 +264,19 @@ class calculation :
                 Mat[lig+2,col+4+1] = -R[couche]  
                 Mat[lig+3,col+4+1] = R[couche]
         
-                Mat[lig+0,col+4+2] = (1 - 2 * self.layers[couche+1].poisson - m * self.layers[couche].lb) * F[couche+1]  
-                Mat[lig+1,col+4+2] = -(2 * self.layers[couche+1].poisson + m * self.layers[couche].lb) * F[couche+1]
-                Mat[lig+2,col+4+2] = -(1 + m * self.layers[couche].lb) * R[couche] * F[couche+1]
-                Mat[lig+3,col+4+2] = (2 - 4 * self.layers[couche+1].poisson - m * self.layers[couche].lb) * R[couche] * F[couche+1]
+                Mat[lig+0,col+4+2] = (1 - 2 * self.struct.layers[couche+1].poisson - m * self.struct.layers[couche].lb) * F[couche+1]  
+                Mat[lig+1,col+4+2] = -(2 * self.struct.layers[couche+1].poisson + m * self.struct.layers[couche].lb) * F[couche+1]
+                Mat[lig+2,col+4+2] = -(1 + m * self.struct.layers[couche].lb) * R[couche] * F[couche+1]
+                Mat[lig+3,col+4+2] = (2 - 4 * self.struct.layers[couche+1].poisson - m * self.struct.layers[couche].lb) * R[couche] * F[couche+1]
                 
-                Mat[lig+0,col+4+3] = -(1 - 2 * self.layers[couche+1].poisson + m * self.layers[couche].lb)  
-                Mat[lig+1,col+4+3] = -((2 * self.layers[couche+1].poisson - m * self.layers[couche].lb))
-                Mat[lig+2,col+4+3] = (1 - m * self.layers[couche].lb) * R[couche]  
-                Mat[lig+3,col+4+3] = (2 - 4 *self.layers[couche+1].poisson + m * self.layers[couche].lb) * R[couche]
+                Mat[lig+0,col+4+3] = -(1 - 2 * self.struct.layers[couche+1].poisson + m * self.struct.layers[couche].lb)  
+                Mat[lig+1,col+4+3] = -((2 * self.struct.layers[couche+1].poisson - m * self.struct.layers[couche].lb))
+                Mat[lig+2,col+4+3] = (1 - m * self.struct.layers[couche].lb) * R[couche]  
+                Mat[lig+3,col+4+3] = (2 - 4 *self.struct.layers[couche+1].poisson + m * self.struct.layers[couche].lb) * R[couche]
                 
                 
             
-            elif not (self.layers[couche].interface): # cas glissant
+            elif not (l_interface[couche]): # cas glissant
                 zro = 0 #1e-50
             
                 # partie gauche
@@ -287,14 +291,14 @@ class calculation :
                 Mat[lig+2,col+1] = -F[couche]
                 Mat[lig+3,col+1] = zro
                 
-                Mat[lig+0,col+2] = -(1 - 2 * self.layers[couche].poisson - m * self.layers[couche].lb)
-                Mat[lig+1,col+2] = 1 + m * self.layers[couche].lb
-                Mat[lig+2,col+2] = 2*self.layers[couche].poisson + m * self.layers[couche].lb
+                Mat[lig+0,col+2] = -(1 - 2 * self.struct.layers[couche].poisson - m * self.struct.layers[couche].lb)
+                Mat[lig+1,col+2] = 1 + m * self.struct.layers[couche].lb
+                Mat[lig+2,col+2] = 2*self.struct.layers[couche].poisson + m * self.struct.layers[couche].lb
                 Mat[lig+3,col+2] = zro
                 
-                Mat[lig+0,col+3] = (1 - 2 * self.layers[couche].poisson + m * self.layers[couche].lb) * F[couche]
-                Mat[lig+1,col+3] = -(1 - m * self.layers[couche].lb) * F[couche]
-                Mat[lig+2,col+3] = (2 * self.layers[couche].poisson - m * self.layers[couche].lb) * F[couche]
+                Mat[lig+0,col+3] = (1 - 2 * self.struct.layers[couche].poisson + m * self.struct.layers[couche].lb) * F[couche]
+                Mat[lig+1,col+3] = -(1 - m * self.struct.layers[couche].lb) * F[couche]
+                Mat[lig+2,col+3] = (2 * self.struct.layers[couche].poisson - m * self.struct.layers[couche].lb) * F[couche]
                 Mat[lig+3,col+3] = zro 
         
                 # partie droite
@@ -309,15 +313,15 @@ class calculation :
                 Mat[lig+2,col+4+1] = zro  
                 Mat[lig+3,col+4+1] = 1
                 
-                Mat[lig+0,col+4+2] = (1 - 2 * self.layers[couche+1].poisson - m * self.layers[couche].lb) * F[couche+1]
-                Mat[lig+1,col+4+2] = -(1 + m * self.layers[couche].lb) * R[couche] * F[couche+1]
+                Mat[lig+0,col+4+2] = (1 - 2 * self.struct.layers[couche+1].poisson - m * self.struct.layers[couche].lb) * F[couche+1]
+                Mat[lig+1,col+4+2] = -(1 + m * self.struct.layers[couche].lb) * R[couche] * F[couche+1]
                 Mat[lig+2,col+4+2] = zro
-                Mat[lig+3,col+4+2] = -(2 * self.layers[couche+1].poisson + m * self.layers[couche].lb) * F[couche+1]
+                Mat[lig+3,col+4+2] = -(2 * self.struct.layers[couche+1].poisson + m * self.struct.layers[couche].lb) * F[couche+1]
                 
-                Mat[lig+0,col+4+3] = -(1 - 2 * self.layers[couche+1].poisson + m * self.layers[couche].lb)
-                Mat[lig+1,col+4+3] = (1 - m * self.layers[couche].lb) * R[couche]
+                Mat[lig+0,col+4+3] = -(1 - 2 * self.struct.layers[couche+1].poisson + m * self.struct.layers[couche].lb)
+                Mat[lig+1,col+4+3] = (1 - m * self.struct.layers[couche].lb) * R[couche]
                 Mat[lig+2,col+4+3] = zro
-                Mat[lig+3,col+4+3] = -(2*self.layers[couche+1].poisson-m*self.layers[couche].lb)
+                Mat[lig+3,col+4+3] = -(2*self.struct.layers[couche+1].poisson-m*self.struct.layers[couche].lb)
                 
         
         # réduction de la matrice en enlevant les colonnes pour An et Cn (car An = 0 et Cn = 0)    
@@ -378,29 +382,15 @@ class calculation :
     #  METHODE FINALE
     # --------------------------------------
     def R_final (self, iteration = 25) :
-        # charge
-        q = self.load.load
-        a = self.load.radius
-
-        # structure
-        th = []
-        E = []
-        nu = []
+              
+        
         isbonded =[]
-        z = []
-        for l in self.layers :
-            th.append(l.thickness)
-            E.append(l.module)
-            nu.append(l.poisson)
+        for l in self.struct.layers :
             isbonded.append(l.interface)
-            z.append(l.z)
-        th = th [0:-1]
+        
         isbonded = isbonded [0:-1]
         
-        # points de calculs
-        z_points = self.params.z_points
-        r_points = self.params.r_points
-
+       
         '''
         Données d'entrées :
             Self.load.load
@@ -429,6 +419,48 @@ class calculation :
         
         '''
         
+        
+        
+
+        ''' ---------------------------------------------------------------------------------
+            cas des interfaces semi-collées
+        '''
+
+        if 1 in isbonded : # si il y a des interfaces semi-collées
+            l_interface=[]
+            l_interface.append( [True if x==0 else False for x in isbonded]) # cas glissant
+            l_interface.append( [False if x==2 else True for x in isbonded]) # cas collé
+        else : 
+            l_interface=[]
+            l_interface.append( [True if x==0 else False for x in isbonded]) 
+            
+
+        
+        # CALCULS INDEPENDANTS DES CONDITIONS D'INTERFACE ------
+    
+        # charge
+        q = self.load.load
+        a = self.load.radius
+
+        # structure
+        th = []
+        E = []
+        nu = []
+        isbonded =[]
+        z = []
+        for l in self.struct.layers :
+            th.append(l.thickness)
+            E.append(l.module)
+            nu.append(l.poisson)
+            z.append(l.z)
+        th = th [0:-1]
+               
+        # points de calculs
+        z_points = self.params.z_points
+        r_points = self.params.r_points
+
+        
+        
         ''' -------------------------------------------------------------------------------------
             Calculs préalables 
         '''    
@@ -436,9 +468,7 @@ class calculation :
         # calcul de H (hauteur de la structure) 
         H= self.struct.htot()
         
-        # toutes les couches sont elles collées ?
-        isb = np.array(isbonded)
-        
+                
         # calcul de c_points (indice de couches pour les z_points)
         c_points = self.params.c_points
 
@@ -458,119 +488,164 @@ class calculation :
         
         # calcul de alpha
         alpha = a/H
-         
-        ''' ---------------------------------------------------------------------------------
-            Boucle sur les valeurs de r_points
-        '''
-        
-        response = {'s_z' : [], 's_t' : [], 's_r' : [], 't_rz' : [], 'w' : [], 'u' : [], 'e_z' : [], 'e_t' : [], 'e_r' : [], }
-        
-        for i , rr in enumerate( r_points) :
-            
-            # calcul des points d'intégration pour une position r
-            l_quad_r=self.params.mValues[i] 
-                      
-            # -------   Boucle sur les valeurs d'intégration   -------
-            
-            # initialisation des variables de résultats
-            k_max = np.shape(l_quad_r)[0]
-                    
-            sig_z   = np.zeros((len(z_points)))
-            sig_z_0 = np.zeros((len(z_points)))                
-            sig_t   = np.zeros((len(z_points)))
-            sig_t_0 = np.zeros((len(z_points)))               
-            sig_r   = np.zeros((len(z_points)))
-            sig_r_0 = np.zeros((len(z_points)))
-            tau_rz   = np.zeros((len(z_points)))
-            tau_rz_0 = np.zeros((len(z_points)))
-            w   = np.zeros((len(z_points)))
-            w_0 = np.zeros((len(z_points)))
-            u   = np.zeros((len(z_points)))
-            u_0 = np.zeros((len(z_points)))
-            
-            # boucle
-            for k, couple_m in enumerate(l_quad_r) :
-                
-                #print (f'itération n°{k}')
-                m=couple_m[0]
-                poids_m = couple_m[1]
-                
-                try :                                       
-                    #print('calcul complet') 
-                    ABCD = self.ABCD_ub(m)
-                    rstar =  self.soll_star(ABCD, m, z_points, rr, c_points )
-                except:
-                    print (' ')
-                    print ("//!\\ //!\\ //!\\ //!\\ //!\\") 
-                    print (f'erreur itération {k}')
-                    print ("//!\\ //!\\ //!\\ //!\\ //!\\")
-                    print (' ')
-                
-                # Récupération des valeurs pour itréation - 1           
-                if k == (k_max)-4 : # 4 car les intervalles d'intégrations sont divisés en 4
-                    sig_z_0 = sig_z
-                    sig_t_0 = sig_t
-                    sig_r_0 = sig_r
-                    tau_rz_0 = tau_rz
-                    w_0 = w
-                    u_0 = u
-            
-                # calcul des sollicitation pour 'itération'
-                s_z_star = np.array(rstar['s_z*'])
-                sig_z = sig_z + poids_m * (q * alpha * 1 / m * j1(m * alpha))  * s_z_star  
-                s_t_star = np.array(rstar['s_t*'])
-                sig_t = sig_t + poids_m * (q * alpha * 1 / m * j1(m * alpha)) * s_t_star
-                s_r_star = np.array(rstar['s_r*'])
-                sig_r = sig_r + poids_m * (q * alpha * 1 / m * j1(m * alpha)) * s_r_star
-                t_rz_star = np.array(rstar['t_rz*'])
-                tau_rz = tau_rz + poids_m * (q * alpha * 1 / m * j1(m * alpha)) * t_rz_star
-                w_star = np.array(rstar['w*'])
-                w = w + poids_m * (q * alpha * 1 / m * j1(m * alpha)) * w_star
-                u_star = np.array(rstar['u*'])
-                u = u + poids_m * (q * alpha * 1 / m * j1(m * alpha)) * u_star
 
-                rstar=None
+        ''' ---------------------------------------------------------------------------------
+            Boucle sur les conditions d'interface
+        '''
+        responses =[]
+        print ('___ L INTERFACE _____')
+        for l in l_interface :
+            print (l)
+
+        for ii, l_inter in enumerate(l_interface) :
+            print (f' CALCUL # {ii+1} ------+++++ taille responses = {len(responses)}')
+            ''' ---------------------------------------------------------------------------------
+                Boucle sur les valeurs de r_points
+            '''
             
-            l_quad_r=None
-                     
-            # moyenne des deux itérations pour une valeur de r
-            sig_z_moy =  np.vstack((sig_z,sig_z_0)).T
-            sig_z =  np.mean(sig_z_moy, axis = 1)
-            sig_t_moy =  np.vstack((sig_t,sig_t_0)).T
-            sig_t =  np.mean(sig_t_moy, axis = 1)
-            sig_r_moy =  np.vstack((sig_r,sig_r_0)).T
-            sig_r =  np.mean(sig_r_moy, axis = 1)
-            tau_rz_moy =  np.vstack((tau_rz,tau_rz_0)).T
-            tau_rz =  np.mean(tau_rz_moy, axis = 1)
-            w_moy =  np.vstack((w,w_0)).T
-            w =  np.mean(w_moy, axis = 1)
-            u_moy =  np.vstack((u, u_0)).T
-            u =  np.mean(u_moy, axis = 1)            
+            response={'s_z' : [], 's_t' : [], 's_r' : [], 't_rz' : [], 'w' : [], 'u' : [], 'e_z' : [], 'e_t' : [], 'e_r' : [], }
+            
+            for i , rr in enumerate( r_points) :
+                
+                # calcul des points d'intégration pour une position r
+                l_quad_r=self.params.mValues[i] 
+                        
+                # -------   Boucle sur les valeurs d'intégration   -------
+                
+                # initialisation des variables de résultats
+                k_max = np.shape(l_quad_r)[0]
+                        
+                sig_z   = np.zeros((len(z_points)))
+                sig_z_0 = np.zeros((len(z_points)))                
+                sig_t   = np.zeros((len(z_points)))
+                sig_t_0 = np.zeros((len(z_points)))               
+                sig_r   = np.zeros((len(z_points)))
+                sig_r_0 = np.zeros((len(z_points)))
+                tau_rz   = np.zeros((len(z_points)))
+                tau_rz_0 = np.zeros((len(z_points)))
+                w   = np.zeros((len(z_points)))
+                w_0 = np.zeros((len(z_points)))
+                u   = np.zeros((len(z_points)))
+                u_0 = np.zeros((len(z_points)))
+                
+                # boucle
+                for k, couple_m in enumerate(l_quad_r) :
+                    
+                    #print (f'itération n°{k}')
+                    m=couple_m[0]
+                    poids_m = couple_m[1]
+                    
+                    try :                                       
+                        #print('calcul complet') 
+                        ABCD = self.ABCD_ub(m, R_, l_inter) # il va falloir itérer sur L_inetrface si semi-collée
+                        rstar =  self.soll_star(ABCD, m, z_points, rr, c_points )
+                    except:
+                        print (' ')
+                        print ("//!\\ //!\\ //!\\ //!\\ //!\\") 
+                        print (f'erreur itération {k}')
+                        print ("//!\\ //!\\ //!\\ //!\\ //!\\")
+                        print (' ')
+                    
+                    # Récupération des valeurs pour itréation - 1           
+                    if k == (k_max)-4 : # 4 car les intervalles d'intégrations sont divisés en 4
+                        sig_z_0 = sig_z
+                        sig_t_0 = sig_t
+                        sig_r_0 = sig_r
+                        tau_rz_0 = tau_rz
+                        w_0 = w
+                        u_0 = u
+                
+                    # calcul des sollicitation pour 'itération'
+                    s_z_star = np.array(rstar['s_z*'])
+                    sig_z = sig_z + poids_m * (q * alpha * 1 / m * j1(m * alpha))  * s_z_star  
+                    s_t_star = np.array(rstar['s_t*'])
+                    sig_t = sig_t + poids_m * (q * alpha * 1 / m * j1(m * alpha)) * s_t_star
+                    s_r_star = np.array(rstar['s_r*'])
+                    sig_r = sig_r + poids_m * (q * alpha * 1 / m * j1(m * alpha)) * s_r_star
+                    t_rz_star = np.array(rstar['t_rz*'])
+                    tau_rz = tau_rz + poids_m * (q * alpha * 1 / m * j1(m * alpha)) * t_rz_star
+                    w_star = np.array(rstar['w*'])
+                    w = w + poids_m * (q * alpha * 1 / m * j1(m * alpha)) * w_star
+                    u_star = np.array(rstar['u*'])
+                    u = u + poids_m * (q * alpha * 1 / m * j1(m * alpha)) * u_star
+
+                    rstar=None
+                
+                l_quad_r=None
+                        
+                # moyenne des deux itérations pour une valeur de r
+                sig_z_moy =  np.vstack((sig_z,sig_z_0)).T
+                sig_z =  np.mean(sig_z_moy, axis = 1)
+                sig_t_moy =  np.vstack((sig_t,sig_t_0)).T
+                sig_t =  np.mean(sig_t_moy, axis = 1)
+                sig_r_moy =  np.vstack((sig_r,sig_r_0)).T
+                sig_r =  np.mean(sig_r_moy, axis = 1)
+                tau_rz_moy =  np.vstack((tau_rz,tau_rz_0)).T
+                tau_rz =  np.mean(tau_rz_moy, axis = 1)
+                w_moy =  np.vstack((w,w_0)).T
+                w =  np.mean(w_moy, axis = 1)
+                u_moy =  np.vstack((u, u_0)).T
+                u =  np.mean(u_moy, axis = 1)            
+            
+                # calcul des déformations
+                e_z = 1 / EE * (sig_z - vv * (sig_t + sig_r))
+                e_t = 1 / EE * (sig_t - vv * (sig_z + sig_r))
+                e_r = 1 / EE * (sig_r - vv * (sig_t + sig_z))
+                
+                # ajout aux tableaux
+                response['s_z'].append(sig_z)
+                response['s_t'].append(sig_t)
+                response['s_r'].append(sig_r)
+                response['t_rz'].append(tau_rz)
+                response['w'].append(w)
+                response['u'].append(u)
+                response['e_z'].append(e_z)
+                response['e_t'].append(e_t)
+                response['e_r'].append(e_r)
+                
+            responses.append(response)
+
+            print (f' FIN CALCUL # {ii +1} ------+++++ taille responses = {len(responses)}')
+
+
+        # responses est donc une liste de 1 à 2 dictionnaires
+
+
         
-            # calcul des déformations
-            e_z = 1 / EE * (sig_z - vv * (sig_t + sig_r))
-            e_t = 1 / EE * (sig_t - vv * (sig_z + sig_r))
-            e_r = 1 / EE * (sig_r - vv * (sig_t + sig_z))
-            
-            # ajout aux tableaux
-            response['s_z'].append(sig_z)
-            response['s_t'].append(sig_t)
-            response['s_r'].append(sig_r)
-            response['t_rz'].append(tau_rz)
-            response['w'].append(w)
-            response['u'].append(u)
-            response['e_z'].append(e_z)
-            response['e_t'].append(e_t)
-            response['e_r'].append(e_r)
-            
-            
-        try :
-            df = self.dict_to_df(response)
-            
-        except :
-            df ='erreur'
+        # moyenne des résulats des un ou deux calculs sur les conditions d'interface
+        
+        # A FAIRE !!!
+        df = self.responses_to_df(responses)
+        
+        return df
+
+
+    def responses_to_df(self, responses) :
+
+        a_conv=[]
+        print(f'il y a eu {len(responses)} calculs')
+        for response in responses :
+
+            l_conv = []
+            keys = list(response.keys())
+
+            for key in keys :
+                cols = response[key]
+                for i, col  in enumerate(cols) :
+                    col = list(col)
+                    l_conv.append(col)
+
+            a_conv.append(np.array(l_conv).T)
+
+        a_conv_ = sum(a_conv) /2
+
+
+        columns = pd.MultiIndex.from_product([keys, self.params.r_points], names=["Sollicitations", "r (m)"])
+        df = pd.DataFrame(a_conv_, columns = columns)
+        df.index = pd.MultiIndex.from_arrays([self.params.c_points, self.params.z_points], names=['couche', 'z (m)'])
 
         return df
+
 
 
     def dict_to_df(self, dico) :

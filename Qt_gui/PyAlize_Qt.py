@@ -118,7 +118,7 @@ class TableStruct(QTableView):
         self.setItemDelegateForColumn(1, FloatDelegate(decimals=3, min_val=0.0, max_val=1000.0, step=0.001)) # épaisseur
         self.setItemDelegateForColumn(2, IntDelegate()) # Module
         self.setItemDelegateForColumn(3, FloatDelegate(decimals=2, min_val=0.0, max_val=1.0, step=0.01)) # poisson
-        self.setItemDelegateForColumn(4, ComboBoxDelegate(["Collée", "Glissante"], self))
+        self.setItemDelegateForColumn(4, ComboBoxDelegate(["Collée", "Semi-collée" "Glissante"], self))
 
         # Configuration des en-têtes
         header = self.horizontalHeader()
@@ -202,10 +202,12 @@ class TableStruct(QTableView):
             module = self.model.item(r, 2).text()
             nu = self.model.item(r, 3).text()
             inter = self.model.item(r,4).text()
-            if inter == 'Collée' or inter == 'colléé' :
-                inter = True
+            if inter == 'Collée' or inter == 'collée' :
+                inter = 0
+            elif inter == 'Semi-collée' :
+                inter = 1
             else :
-                inter = False
+                inter = 2
             a_layer = layer()
             a_layer.define(nom, float(ep), int(module), float(nu), inter, r)
             struct.add_layer(a_layer)
@@ -374,7 +376,7 @@ class MainWindow(QMainWindow):
                     mo = int(float(line[2]))
                     cf = float(line[3])
                     interf = line[4].strip()
-                    if interf not in ["Collée", "Glissante"]:
+                    if interf not in ["Collée", "Semi-collée", "Glissante"]:
                         raise ValueError(f"Interface invalide : {interf}")
                     new_data.append([nom, ep, mo, cf, interf])
                 self.table.model.removeRows(0, self.table.model.rowCount())

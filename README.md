@@ -29,6 +29,7 @@ Les résultats sont édités sous forme d'un fichier texte.
 
 # Améliorations
 - ajouter une interface semi-collée : les résulats seront la demi-somme des cas collés et glissant (cf. NP 98-086)
+    => premiere implémentation faite => vérifier la cohérence en faisant un calcul collé et un calcul glissant puis la moyenne
 - prévoir une bibliotheque de matériaux (NF P 98 086)
 
     ## GUI - Interface graphique
