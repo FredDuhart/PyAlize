@@ -61,7 +61,7 @@ class IntDelegate(QStyledItemDelegate):
 
 # --- Délégué pour les floats ---
 class FloatDelegate(QStyledItemDelegate):
-    def __init__(self, decimals=4, min_val=0.0, max_val=1_000_000.0, step=0.01, parent=None):
+    def __init__(self, decimals=4, min_val=0.0, max_val=1_000_000.0, step=0.001, parent=None):
         super().__init__(parent)
         self.decimals = decimals
         self.min_val = min_val
@@ -115,9 +115,9 @@ class TableStruct(QTableView):
         self.setModel(self.model)
 
         # Délégués
-        self.setItemDelegateForColumn(1, FloatDelegate(decimals=2, min_val=0.0, max_val=1000.0, step=0.1)) # épaisseur
+        self.setItemDelegateForColumn(1, FloatDelegate(decimals=3, min_val=0.0, max_val=1000.0, step=0.001)) # épaisseur
         self.setItemDelegateForColumn(2, IntDelegate()) # Module
-        self.setItemDelegateForColumn(3, FloatDelegate(decimals=4, min_val=0.0, max_val=1.0, step=0.01)) # poisson
+        self.setItemDelegateForColumn(3, FloatDelegate(decimals=2, min_val=0.0, max_val=1.0, step=0.01)) # poisson
         self.setItemDelegateForColumn(4, ComboBoxDelegate(["Collée", "Glissante"], self))
 
         # Configuration des en-têtes

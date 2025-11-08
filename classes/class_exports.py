@@ -21,7 +21,7 @@ f_dep = '.4f'
 
 
 dict_mep = {'couche' : ['Couche', 1, ''],
-                'z (m)' : ['Prof. (m)' , 1, '.2f'],
+                'z (m)' : ['Prof. (m)' , 1, '.3f'],
                 's_z' : [f'{chr(963)}z (MPa)', coef_sigma, f_sigma],
                 's_t' : [f'{chr(963)}t (MPa)', coef_sigma, f_sigma],
                 's_r' : [f'{chr(963)}r (MPa)', coef_sigma, f_sigma],
@@ -126,7 +126,10 @@ def export_results (resultats,  charge : load, struct : structure, file_name) :
 
     '''
 
-
+    
+    
+    name_project = file_name.split('/')[-1][0:-4]
+    t_name = titre(name_project)
 
     # 
     r_points = list(resultats.columns.levels [1])
@@ -162,7 +165,8 @@ def export_results (resultats,  charge : load, struct : structure, file_name) :
         
 
     with open(file_name, 'w', encoding = "utf-8") as f:
-
+        f.write(t_name)
+        f.write('\n')
 
         f.write(t_struct)
         f.write(e_struct)

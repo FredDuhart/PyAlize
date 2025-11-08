@@ -1,0 +1,5 @@
+nom,épaisseur,module,"coefficient
+ de poisson",interface
+BC5,0.23,35000,0.25,Glissante
+BC2,0.18,20000,0.25,Collée
+PF2,0,50,0.35,Collée
