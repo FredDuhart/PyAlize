@@ -30,7 +30,10 @@ Reste à faire :
 - présentation des résultats
 - possibilité de choisir une autre charge de référence, voire de construire un chargement complexe...
 
-# Problèmes
-Seuls les cas de structures avec interfaces entièrement collées focntionnent. Une tentative d'implémentation des interfaces glissantes a été testée mais donne des résultats érronés.
-Toute aide serait la bienvenue.
+# Problèmes et améliorations
+- Seuls les cas de structures avec interfaces entièrement collées focntionnent. Une tentative d'implémentation des interfaces glissantes a été testée mais donne des résultats érronés.
+- prévoir une bibliotheque de matériaux (NF P 98 086)
+
+
+
 

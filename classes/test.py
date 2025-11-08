@@ -29,7 +29,7 @@ b_layer = layer()
 c_layer = layer()
 d_layer = layer()
 a_layer.define('BB' , 0.06, 7000, 0.35, True, 0)
-b_layer.define('GB3', 0.12, 10000   , 0.35, True, 1)
+b_layer.define('GB3', 0.12, 10000   , 0.35, False, 1)
 d_layer.define('CdF', None, 50, 0.35, True,3)
 struct = structure()
 struct.add_layer(a_layer)
@@ -94,7 +94,7 @@ if load_.type == 'jumelage' :
     res =  res_jum(res, params.r_points)
 
 #################################
-
+file_name = "C:/Users/f.duhart/OneDrive - Département de la Gironde/Documents/06-Git/PyAlize/exports/test_UB2.txt"
 # ecriture txt
-export_results (res, load_, struct )
+export_results (res, load_, struct, file_name)
 

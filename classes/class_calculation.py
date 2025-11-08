@@ -44,7 +44,7 @@ class calculation :
         
         # R[0] -  equations B.12a et B.12b 
         
-        #R0=(E[0]/E[1])*(1+nu[1])/(1+nu[0])
+        #R0=(E[0]/E[1])*(1+nu[1])/(1+self.layers[0].poisson)
         R0=(self.layers[0].module/self.layers[1].module)*(1+self.layers[1].poisson)/(1+self.layers[0].poisson)
         R.append(R0)
         
@@ -371,102 +371,196 @@ class calculation :
         
         return response
         
+    def ABCD_ub(self, m) :
+         
+                    
+        ''' --------------------------------------- '''
+        ''' calcul des valeurs F(i) dépendantes de m '''
+        F=self.F_m(m)
+        R = self.R()
+
+        # nombre de couches
+        n = len (self.layers)    
+        
+        ''' -------------- calcul de la matrice de dimensions 4n-2 x 4n-2 -----------------
+        '''
+        
+        s_Mat = (4 * n  - 2 , 4 * n  )
+        Mat = np.zeros (s_Mat, dtype=np.float64)
+        
+        # equations B.9 ====> condtions limites à la surface
+        
+        Mat[0,0] = math.exp(-self.layers[0].lb * m)
+        Mat[1,0] = math.exp(-self.layers[0].lb * m)
+        Mat[0,1] = 1
+        Mat[1,1] = -1
+        
+        Mat[0,2] = -(1 - 2 * self.layers[0].poisson) * math.exp(-m * self.layers[0].lb);
+        Mat[1,2] = 2 * self.layers[0].poisson * math.exp(-m * self.layers[0].lb);
+        Mat[0,3] = 1 - 2 * self.layers[0].poisson;
+        Mat[1,3] = 2 * self.layers[0].poisson;
         
         
-    def soll_star_unique(self, ABCD, m, z_point, c_point, rho) :
-        # args
-        #   ABCD = coefficent A B C et D pour les n couches et ue valeur de m (i.e. de r)
-        #   m = borne d'intégration
-        #   z_point = profondeur du point calculé
-        #   c_point = indice de la couche dans laquelle se situe z_point
-        #   rho = r_point / H 
-        # return
-        #   dictionnaire des sollicitations* pour un r et un z donné, et une valeur de m
-        #   {'s_z*' : [], 's_t*' : [], 's_r*' : [], 't_rz*' : [], 'w*' : [], 'u*' : []}
-
-
-
-        #initialisation de la variable de rendu
-        # la variable de rendu est un dictionnaire
+        # equations B.11 ou B.17 ======> conditions d'interfaces de couches
         
-        A = ABCD[0]
-        B = ABCD[1]
-        C = ABCD[2]
-        D = ABCD[3]
-
-
-        response = {'s_z*' : [], 's_t*' : [], 's_r*' : [], 't_rz*' : [], 'w*' : [], 'u*' : []}
+        for couche in range (n-1): 
+            
+            # la premiere ligne est la troisième => indice = 2
+            # ligne1 = 2 + (couche)*4
+            
+            lig = 2 + couche * 4
+            col = couche * 4
+            
+            
+            if self.layers[couche].interface :#] interface collée
+                            
+                # partie gauche
+                Mat[lig+0,col+0]=1
+                Mat[lig+1,col+0]=1
+                Mat[lig+2,col+0]=1
+                Mat[lig+3,col+0]=1
         
+                Mat[lig+0,col+1] = F[couche]
+                Mat[lig+1,col+1] = -F[couche]
+                Mat[lig+2,col+1] = F[couche]
+                Mat[lig+3,col+1] = -F[couche]
+                
+                Mat[lig+0,col+2] = -(1 - 2 * self.layers[couche].poisson - m * self.layers[couche].lb)
+                Mat[lig+1,col+2] = (2 * self.layers[couche].poisson + m * self.layers[couche].lb)
+                Mat[lig+2,col+2] = 1 + m * self.layers[couche].lb
+                Mat[lig+3,col+2] = -(2 - 4 * self.layers[couche].poisson - m * self.layers[couche].lb)
+        
+                Mat[lig+0,col+3] = (1 - 2 * self.layers[couche].poisson + m * self.layers[couche].lb) * F[couche]              
+                Mat[lig+1,col+3] = (2 * self.layers[couche].poisson - m * self.layers[couche].lb) * F[couche]
+                Mat[lig+2,col+3] = -(1 - m * self.layers[couche].lb )* F[couche]
+                Mat[lig+3,col+3] = -(2 - 4 * self.layers[couche].poisson + m * self.layers[couche].lb) * F[couche]
+                
+                
+                # partie droite
+            
+                Mat[lig+0,col+4+0] = -F[couche+1]  
+                Mat[lig+1,col+4+0] = -F[couche+1]
+                Mat[lig+2,col+4+0] = -R[couche] * F[couche+1]  
+                Mat[lig+3,col+4+0] = -R[couche] * F[couche+1]
+        
+                Mat[lig+0,col+4+1] = -1  
+                Mat[lig+1,col+4+1] = 1
+                Mat[lig+2,col+4+1] = -R[couche]  
+                Mat[lig+3,col+4+1] = R[couche]
+        
+                Mat[lig+0,col+4+2] = (1 - 2 * self.layers[couche+1].poisson - m * self.layers[couche].lb) * F[couche+1]  
+                Mat[lig+1,col+4+2] = -(2 * self.layers[couche+1].poisson + m * self.layers[couche].lb) * F[couche+1]
+                Mat[lig+2,col+4+2] = -(1 + m * self.layers[couche].lb) * R[couche] * F[couche+1]
+                Mat[lig+3,col+4+2] = (2 - 4 * self.layers[couche+1].poisson - m * self.layers[couche].lb) * R[couche] * F[couche+1]
+                
+                Mat[lig+0,col+4+3] = -(1 - 2 * self.layers[couche+1].poisson + m * self.layers[couche].lb)  
+                Mat[lig+1,col+4+3] = -((2 * self.layers[couche+1].poisson - m * self.layers[couche].lb))
+                Mat[lig+2,col+4+3] = (1 - m * self.layers[couche].lb) * R[couche]  
+                Mat[lig+3,col+4+3] = (2 - 4 *self.layers[couche+1].poisson + m * self.layers[couche].lb) * R[couche]
+                
+                
+            
+            elif not (self.layers[couche].interface): # cas glissant
+                zro = 0 #1e-50
+            
+                # partie gauche
+                    
+                Mat[lig+0,col+0] = 1
+                Mat[lig+1,col+0] = 1
+                Mat[lig+2,col+0] = 1
+                Mat[lig+3,col+0] = zro
+                
+                Mat[lig+0,col+1] = F[couche]
+                Mat[lig+1,col+1] = F[couche]
+                Mat[lig+2,col+1] = -F[couche]
+                Mat[lig+3,col+1] = zro
+                
+                Mat[lig+0,col+2] = -(1 - 2 * self.layers[couche].poisson - m * self.layers[couche].lb)
+                Mat[lig+1,col+2] = 1 + m * self.layers[couche].lb
+                Mat[lig+2,col+2] = 2*self.layers[couche].poisson + m * self.layers[couche].lb
+                Mat[lig+3,col+2] = zro
+                
+                Mat[lig+0,col+3] = (1 - 2 * self.layers[couche].poisson + m * self.layers[couche].lb) * F[couche]
+                Mat[lig+1,col+3] = -(1 - m * self.layers[couche].lb) * F[couche]
+                Mat[lig+2,col+3] = (2 * self.layers[couche].poisson - m * self.layers[couche].lb) * F[couche]
+                Mat[lig+3,col+3] = zro 
+        
+                # partie droite
+                
+                Mat[lig+0,col+4+0] = -F[couche+1]  
+                Mat[lig+1,col+4+0] = -R[couche]*F[couche+1]
+                Mat[lig+2,col+4+0] = zro  
+                Mat[lig+3,col+4+0] = -F[couche+1]
+                    
+                Mat[lig+0,col+4+1] = -1  
+                Mat[lig+1,col+4+1] = -R[couche]
+                Mat[lig+2,col+4+1] = zro  
+                Mat[lig+3,col+4+1] = 1
+                
+                Mat[lig+0,col+4+2] = (1 - 2 * self.layers[couche+1].poisson - m * self.layers[couche].lb) * F[couche+1]
+                Mat[lig+1,col+4+2] = -(1 + m * self.layers[couche].lb) * R[couche] * F[couche+1]
+                Mat[lig+2,col+4+2] = zro
+                Mat[lig+3,col+4+2] = -(2 * self.layers[couche+1].poisson + m * self.layers[couche].lb) * F[couche+1]
+                
+                Mat[lig+0,col+4+3] = -(1 - 2 * self.layers[couche+1].poisson + m * self.layers[couche].lb)
+                Mat[lig+1,col+4+3] = (1 - m * self.layers[couche].lb) * R[couche]
+                Mat[lig+2,col+4+3] = zro
+                Mat[lig+3,col+4+3] = -(2*self.layers[couche+1].poisson-m*self.layers[couche].lb)
+                
+        
+        # réduction de la matrice en enlevant les colonnes pour An et Cn (car An = 0 et Cn = 0)    
+        
+        Mat_reduit = Mat[:,0:-4]
+        Mat_Bn = Mat [:,-3]
+        Mat_Dn = Mat [:,-1]
+        
+        Mat_BnDn = np.vstack((Mat_Bn,Mat_Dn)).T
+        
+        Mat_fin = np.hstack((Mat_reduit, Mat_BnDn))
+        
+        # définiiton du vecteur de droite (nul partout sauf pour le premier élément = 1)
+        
+        vect_droite = np.zeros(4 * n -2)
+        vect_droite[0] = 1 # cf. equation B.9
+        
+        # résolution des équations
+        
+        try :
 
-        H = self.htot()
-        #rho=r_point/H # à passer en argument
-                       
-        n = len (self.layers)
+            res = np.linalg.solve(Mat_fin, vect_droite)
+        
+        except Exception as e:
+            print ( f"Échec dans la résolution : {e}")
+        
+        # définition des tableau A, B, C et D
+        
+        A=np.zeros(4,dtype=np.float64)
+        B=np.zeros(4,dtype=np.float64)
+        C=np.zeros(4,dtype=np.float64)
+        D=np.zeros(4,dtype=np.float64)
+        
+        for i in range (n) :
+        
+            if i != n-1 :
+                A[i]=res[4*i]
+                B[i]=res[4*i+1]
+                C[i]=res[4*i+2]
+                D[i]=res[4*i+3]
+                
+            else :
+                A[i]=0
+                B[i]=res[-2]
+                C[i]=0
+                D[i]=res[-1]
 
-        lmm = z_point/H
-        ii = c_point
+        ABCD = []
+        ABCD.append(A)
+        ABCD.append(B)
+        ABCD.append(C)
+        ABCD.append(D)  
+        
+        return ABCD
     
-        # ajout d'uen couche virtuelle en fin de structure pour éviter
-        # les erreurs sur la première couche => lb (i-1) = lb (-1) = 0
-        if ii == 0 :
-            virtual_l = layer()
-            virtual_l.define('virtual', None, None, None, None, n)
-            virtual_l.lb = 0
-            self.layers.append(virtual_l)
-        
-
-
-        # pour gérer rho = 0 pour sigma t et sigma r            
-
-        if rho == 0 :
-            COEF1 = m/2 # reste à vérifier car vu nulle part !
-        else :
-            COEF1 = j1(m * rho) / rho            
-
-
-        # sigma z
-        
-            
-        sigma_z = -m * j0(m * rho) * ((A[ii] - C[ii] * (1 - 2 * self.layers[ii].poisson - m * lmm)) * math.exp(-m * (self.layers[ii].lb - lmm)) 
-                                    + (B[ii] + D[ii] * (1 - 2 * self.layers[ii].poisson + m * lmm)) * math.exp(-m * (lmm - self.layers[ii - 1].lb))) 
-
-        # sigma t
-                    
-                    
-        sigma_t = COEF1 * ((A[ii] + C[ii] * (1 + m * lmm)) * math.exp(-m * (self.layers[ii].lb - lmm)) + (B[ii] - D[ii] * (1 - m * lmm)) * math.exp(-m * (lmm - self.layers[ii - 1].lb))) + 2 * self.layers[ii].poisson * m * j0(m * rho) * (C[ii] * math.exp(-m * (self.layers[ii].lb - lmm)) - D[ii] * math.exp(-m * (lmm - self.layers[ii - 1].lb)))
-        
-            
-        # sigma r
-        
-        sigma_r = (m * j0( m * rho) - COEF1) * ((A[ii] + C[ii] * (1 + m * lmm)) * math.exp(-m * (self.layers[ii].lb - lmm)) + (B[ii] - D[ii] * (1 - m * lmm)) * math.exp(-m * (lmm - self.layers[ii-1].lb))) + 2 * self.layers[ii].poisson * m * j0( m * rho) * (C[ii] * math.exp(-m * (self.layers[ii].lb - lmm)) - D[ii] * math.exp(-m * (lmm - self.layers[ii - 1].lb)))
-
-        
-        
-        
-        # tau rz
-        
-        tau_rz = m * j1( m * rho) * ((A[ii] + C[ii] * (2 * self.layers[ii].poisson + m * lmm)) * math.exp(-m * (self.layers[ii].lb - lmm)) - (B[ii] - D[ii] * (2 * self.layers[ii].poisson - m * lmm)) * math.exp(-m * (lmm - self.layers[ii - 1].lb)))
-        
-        # w 
-        
-        w = -H*(1 + self.layers[ii].poisson) / self.layers[ii].module * j0( m * rho) * ((A[ii] - C[ii] * (2 - 4 * self.layers[ii].poisson - m * lmm)) * math.exp(-m * (self.layers[ii].lb - lmm)) - (B[ii] + D[ii] * (2 - 4 * self.layers[ii].poisson + m * lmm)) * math.exp(-m * (lmm - self.layers[ii - 1].lb)))         
-        
-        # u 
-        
-        u = H*(1 + self.layers[ii].poisson) / self.layers[ii].module * j1( m * rho) * ((A[ii] + C[ii] * (1 + m * lmm)) * math.exp(-m * (self.layers[ii].lb - lmm)) + (B[ii] - D[ii] * (1 - m * lmm)) * math.exp(-m * (lmm - self.layers[ii - 1].lb)))
-
-        response['s_z*'].append(sigma_z)
-        response['s_t*'].append(sigma_t)
-        response['s_r*'].append(sigma_r)
-        response['t_rz*'].append(tau_rz)
-        response['w*'].append(w)
-        response['u*'].append(u)
-
-        if ii == 0 :
-            del self.layers[-1]
-            virtual_l = None  
-        
-        return response
     
 
     # --------------------------------------
@@ -593,13 +687,17 @@ class calculation :
                 m=couple_m[0]
                 poids_m = couple_m[1]
                 
+                all_bonded = (isb.sum() == len (isb))
+                #print (f'somme = {isb.sum()} /// longueur = {len(isb)}')
+                #all_bonded = False
                 # choix du mode de calcul
-                if isb.sum() == len (isb) : #   toutes interfaces collées
+                if all_bonded : #   toutes interfaces collées
                     try :                                       
                         #print('Calcul optimisé')
                         Fm = self.F_m(m)
                         M, MM = self.MMMM(R_, Fm, m)
                         ABCD = self.ABCD(M, MM, m)
+                        #ABCD = self.ABCD_ub(m)
                         rstar =  self.soll_star(ABCD, m, z_points, rr, c_points )
                     except:
                         print (' ')
@@ -608,12 +706,10 @@ class calculation :
                         print ("//!\\ //!\\ //!\\ //!\\ //!\\")
                         print (' ')
                         
-                if isb.sum() != len (isb) : # cas ou toutes les interfaces ne sont pas collées
+                if not(all_bonded) : # cas ou toutes les interfaces ne sont pas collées
                     try :                                       
                         #print('calcul complet') 
-                        Fm = self.F_m(m)
-                        M, MM = self.MMMM(R_, Fm, M)
-                        ABCD = self.ABCD(M, MM, m)
+                        ABCD = self.ABCD_ub(m)
                         rstar =  self.soll_star(ABCD, m, z_points, rr, c_points )
                     except:
                         print (' ')
