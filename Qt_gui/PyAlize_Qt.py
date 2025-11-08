@@ -159,7 +159,7 @@ class TableStruct(QTableView):
         for idx in sorted(sel, key=lambda x: x.row(), reverse=True):
             self.model.removeRow(idx.row())
 
-    def export_to_csv(self, filename):
+    def export_to_csv_old(self, filename):
         headers = [self.model.headerData(i, Qt.Horizontal) for i in range(self.model.columnCount())]
         with open(filename, "w", newline="", encoding='utf-8') as f:
             writer = csv.writer(f)
@@ -169,6 +169,25 @@ class TableStruct(QTableView):
                     self.model.item(r, c).text() if self.model.item(r, c) else ""
                     for c in range(self.model.columnCount())
                 ])
+
+    def export_to_csv(self, filename):
+        headers = [self.model.headerData(i, Qt.Horizontal) for i in range(self.model.columnCount())]
+        with open(filename, "w", newline="", encoding='utf-8') as f:
+            writer = csv.writer(f)
+            writer.writerow(headers)
+            for r in range(self.model.rowCount()):
+                text_row=[]
+                for c in range (self.model.columnCount()):
+                    #print (f'{r+1} x {c+1} =====> {self.model.item(r, c).text()}')
+                    if self.model.item(r, c) :
+                        if self.model.item(r, c).text() == 'None' :
+                            cr = 0
+                        else :
+                            cr=self.model.item(r, c).text()
+                    else :
+                        cr = ""
+                    text_row.append(cr)   
+                writer.writerow(text_row)
 
     def export_struct(self) :
         # exporte les données sous forme d'un objet structure
