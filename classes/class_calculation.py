@@ -85,194 +85,6 @@ class calculation :
 
         return F
        
-    def MMMM (self, R_, F, m) : #all bonded
-            
-        n = len (self.layers)
-        
-        ''' --------------------------------------- '''
-        ''' calcul des matrices de l'équation B.11 '''
-
-
-
-        MM1=[]
-        MM2=[]
-        M=[]
-        
-        for couche in range(n-1): # toutes les couches sauf le substratum
-
-            
-
-            s=(4,4)
-            M1 = np.zeros(s, dtype=np.float64)
-            M2 = np.zeros(s, dtype=np.float64)
-
-    
-                        
-            # Matrice M1 (gauche)
-            M1[0,0]=1
-            M1[1,0]=1
-            M1[2,0]=1
-            M1[3,0]=1
-
-            M1[0,1] = F[couche]
-            M1[1,1] = -F[couche]
-            M1[2,1] = F[couche]
-            M1[3,1] = -F[couche]
-            
-            M1[0,2] = -(1 - 2 * self.layers[couche].poisson - m * self.layers[couche].lb)
-            M1[1,2] = (2 * self.layers[couche].poisson + m * self.layers[couche].lb)
-            M1[2,2] = 1 + m * self.layers[couche].lb
-            M1[3,2] = -(2 - 4 * self.layers[couche].poisson - m * self.layers[couche].lb)
-
-            M1[0,3] = (1 - 2 * self.layers[couche].poisson + m * self.layers[couche].lb) * F[couche]              
-            M1[1,3] = (2 * self.layers[couche].poisson - m * self.layers[couche].lb) * F[couche]
-            M1[2,3] = -(1 - m * self.layers[couche].lb )* F[couche]
-            M1[3,3] = -(2 - 4 * self.layers[couche].poisson + m * self.layers[couche].lb) * F[couche]
-            
-            MM1.append(M1)
-        
-            # Matrice M2 (droite)
-        
-            M2[0,0] = F[couche+1]
-            M2[1,0] = F[couche+1]
-            M2[2,0] = R_[couche] * F[couche+1]
-            M2[3,0] = R_[couche] * F[couche+1]
-
-            M2[0,1] = 1
-            M2[1,1] = -1
-            M2[2,1] = R_[couche]
-            M2[3,1] = -R_[couche]
-
-            M2[0,2] = -(1 - 2 * self.layers[couche+1].poisson - m * self.layers[couche].lb) * F[couche+1]
-            M2[1,2] = (2 * self.layers[couche+1].poisson + m * self.layers[couche].lb) * F[couche+1]
-            M2[2,2] = (1 + m * self.layers[couche].lb) * R_[couche] * F[couche+1]
-            M2[3,2] = -(2 - 4 * self.layers[couche+1].poisson - m * self.layers[couche].lb) * R_[couche] * F[couche+1]
-            
-            M2[0,3] = 1 - 2 * self.layers[couche+1].poisson + m * self.layers[couche].lb
-            M2[1,3] = (2 * self.layers[couche+1].poisson - m * self.layers[couche].lb)
-            M2[2,3] = -(1 - m * self.layers[couche].lb) * R_[couche]
-            M2[3,3] = -(2 - 4 *self.layers[couche+1].poisson + m * self.layers[couche].lb) * R_[couche]
-            
-            MM2.append(M2)
-        
-    
-            
-            
-            #  calcul de M
-                
-            try :
-                                
-                
-                M_ = np.linalg.solve(M1, M2)     
-                M.append(M_)
-                
-            except :
-                a= np.linalg.det(M2) 
-                texte = f'Le déterminant de M2 pour la couche {couche+1} vaut {a}'
-                M.append(texte)
-            
-
-        ''' --------------------------------------- '''
-        ''' calcul de la matrice de l'équation B.15 '''
-        
-
-        MM = np.identity(4, dtype=np.float64)
-            
-        for i in range (n-1):
-            if type(M[i])=='string':
-                pass
-            MM=np.dot(MM, M[i])
-
-        # MM est une matrice 4x4, il faut la réduire à une 4x2 pour trouver celle de l'équation B.15
-        # toutes les lignes mais uniquement les colonnes 2(1 pour np) et 4 (3 pour np)
-
-        ixgrid = np.ix_([0,1,2,3], [1, 3])
-        MM=MM[ixgrid] # récupère le tableau 4x2 avec toutes les lignes et les colonnes 2 et 4
-
-
-
-        return M, MM
-
-    def ABCD (self, M, MM, m) :
-
-        n = len(self.layers)
-        ''' --------------------------------------- '''
-        ''' calcul des valeurs An, Bn, Cn et Dn '''
-        
-      
-        
-        b11 = math.exp(-self.layers[0].lb * m)
-        b21 = math.exp(-self.layers[0].lb * m)
-        b12 = 1
-        b22 = -1
-
-        
-        
-        c11 = -(1 - 2 * self.layers[0].poisson) * math.exp(-m * self.layers[0].lb)
-        c21 = 2 * self.layers[0].poisson * math.exp(-m * self.layers[0].lb)
-        c12 = 1 - 2 * self.layers[0].poisson
-        c22 = 2 * self.layers[0].poisson
-        
-        
-        
-        
-        k11 = b11 * MM[0,0] + b12 * MM[1,0] + c11 * MM[2,0] + c12 * MM[3,0]
-        k12 = b11 * MM[0,1] + b12 * MM[1,1] + c11 * MM[2,1] + c12 * MM[3,1]
-        k21 = b21 * MM[0,0] + b22 * MM[1,0] + c21 * MM[2,0] + c22 * MM[3,0]
-        k22 = b21 * MM[0,1] + b22 * MM[1,1] + c21 * MM[2,1] + c22 * MM[3,1]
-        
-        
-        ''' calculs de Bn et Dn avec division par 1exx de k pour éviter overflow '''
-        
-        p_k11=round(math.log10(abs(k11)),0)
-        p_k12=round(math.log10(abs(k12)),0)
-        p_k21=round(math.log10(abs(k21)),0)
-        p_k22=round(math.log10(abs(k22)),0)
-
-        p_=min(p_k11, p_k12, p_k21, p_k22)
-
-        p_ = 10**p_
-
-        k11= k11 / p_
-        k12= k12 / p_
-        k21= k21 / p_
-        k22= k22 / p_
-
-        
-
-        A=np.zeros(n,dtype=np.float64)
-        B=np.zeros(n,dtype=np.float64)
-        C=np.zeros(n,dtype=np.float64)
-        D=np.zeros(n,dtype=np.float64)
-
-        
-
-        A[n-1] = 0
-        B[n-1] = k22 / (k11 * k22 - k12 * k21) * (1/p_)
-        C[n-1] = 0
-        D[n-1] = 1 / (k12 - k22 * k11 / k21) * (1/p_)
-        
-        for i in reversed(range(n-1)):
-            
-                
-            vnp = np.vstack((A[i+1], B[i+1], C[i+1], D[i+1]))
-
-                             
-            BC = np.dot(M[i], vnp)
-                            
-            A[i]=BC[0]
-            B[i]=BC[1]
-            C[i]=BC[2]
-            D[i]=BC[3]
-
-        ABCD = []
-        ABCD.append(A)
-        ABCD.append(B)
-        ABCD.append(C)
-        ABCD.append(D)
-        
-
-        return ABCD
     
     def soll_star(self, ABCD, m, z_points, r_point, c_points ) :
         #initialisation de la variable de rendu
@@ -562,13 +374,9 @@ class calculation :
         return ABCD
     
     
-
     # --------------------------------------
     #  METHODE FINALE
     # --------------------------------------
-
-
-
     def R_final (self, iteration = 25) :
         # charge
         q = self.load.load
@@ -687,36 +495,16 @@ class calculation :
                 m=couple_m[0]
                 poids_m = couple_m[1]
                 
-                all_bonded = (isb.sum() == len (isb))
-                #print (f'somme = {isb.sum()} /// longueur = {len(isb)}')
-                #all_bonded = False
-                # choix du mode de calcul
-                if all_bonded : #   toutes interfaces collées
-                    try :                                       
-                        #print('Calcul optimisé')
-                        Fm = self.F_m(m)
-                        M, MM = self.MMMM(R_, Fm, m)
-                        ABCD = self.ABCD(M, MM, m)
-                        #ABCD = self.ABCD_ub(m)
-                        rstar =  self.soll_star(ABCD, m, z_points, rr, c_points )
-                    except:
-                        print (' ')
-                        print ("//!\\ //!\\ //!\\ //!\\ //!\\") 
-                        print (f'erreur itération {k}')
-                        print ("//!\\ //!\\ //!\\ //!\\ //!\\")
-                        print (' ')
-                        
-                if not(all_bonded) : # cas ou toutes les interfaces ne sont pas collées
-                    try :                                       
-                        #print('calcul complet') 
-                        ABCD = self.ABCD_ub(m)
-                        rstar =  self.soll_star(ABCD, m, z_points, rr, c_points )
-                    except:
-                        print (' ')
-                        print ("//!\\ //!\\ //!\\ //!\\ //!\\") 
-                        print (f'erreur itération {k}')
-                        print ("//!\\ //!\\ //!\\ //!\\ //!\\")
-                        print (' ')
+                try :                                       
+                    #print('calcul complet') 
+                    ABCD = self.ABCD_ub(m)
+                    rstar =  self.soll_star(ABCD, m, z_points, rr, c_points )
+                except:
+                    print (' ')
+                    print ("//!\\ //!\\ //!\\ //!\\ //!\\") 
+                    print (f'erreur itération {k}')
+                    print ("//!\\ //!\\ //!\\ //!\\ //!\\")
+                    print (' ')
                 
                 # Récupération des valeurs pour itréation - 1           
                 if k == (k_max)-4 : # 4 car les intervalles d'intégrations sont divisés en 4

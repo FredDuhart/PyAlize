@@ -28,7 +28,7 @@ Les résultats sont édités sous forme d'un fichier texte.
 - Seuls les cas de structures avec interfaces entièrement collées fonctionnent. Une tentative d'implémentation des interfaces glissantes a été testée mais donne des résultats érronés => à conforter avec un test sur alize
 
 # Améliorations
-- ajouter une interface seùmi-collée : les résulats seront la demi-somme des cas collés et glissant (cf. NP 98-086)
+- ajouter une interface semi-collée : les résulats seront la demi-somme des cas collés et glissant (cf. NP 98-086)
 - prévoir une bibliotheque de matériaux (NF P 98 086)
 
     ## GUI - Interface graphique
@@ -39,6 +39,8 @@ Les résultats sont édités sous forme d'un fichier texte.
 
 # tests à faire
 - test de vitesse de calcul sur les deux méthodes (en commençant par toutes interfaces collées)
+ ===> Fait la méthode 'optimisée' ne l'est pas du tout ! + 40 % de temps
+       la méthode optimisée a été supprimée
 
 
 

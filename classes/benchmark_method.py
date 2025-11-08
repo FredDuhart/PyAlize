@@ -59,42 +59,31 @@ if load_.type == 'jumelage' :
 #, disj/2, disj]#, disj/2]#, disj]
 params.define_r_points (rp)
 
-# Calculs *****************************************************
+# benchmark *****************************************************
 
 
-resultats = calculation(struct, params, load_, forced = False)
-res  = resultats.final_results
+import time
+it = 500
 
-###### Cas d'un jumelage ####################
+t_m1 =[]
+t_m2 = []
 
-def res_jum (res, rr) :
-    
-    solls = ['s_z','s_t','s_r','t_rz','w','u','e_z','e_t','e_r']
-    
-    for soll in solls :
-        for i, r in enumerate(rr) :
-            res[soll, r] = res[soll, r] + res[soll, rr[-1-i]]
-        
-    res = res.drop(rr[-1], level = 1, axis=1) # on enlève la derniere position de r mais ça ne mets pas à jour la liste des colonnes....
+for i in range (it) :
 
-    #renomage des colonnes
-    # level 1
-    l_1 = rr[:-1] * len(solls)
-    # level 0
-    l_0 = []
-    for soll in solls :
-        for i in range(len(rr[:-1])) :
-            l_0.append(soll)
-    
-    res.columns = res.columns.remove_unused_levels()
+    t0 = time.perf_counter()
+    resultats = calculation(struct, params, load_, forced = False)
+    t1 =time.perf_counter()
+    del resultats
 
-    return res
-    
-if load_.type == 'jumelage' :
-    res =  res_jum(res, params.r_points)
+    t_m1.append(t1 - t0)
 
-#################################
-file_name = "C:/Users/f.duhart/OneDrive - Département de la Gironde/Documents/06-Git/PyAlize/exports/test_UB2.txt"
-# ecriture txt
-export_results (res, load_, struct, file_name)
+    t0 = time.perf_counter()
+    resultats = calculation(struct, params, load_, forced = True)
+    t1 =time.perf_counter()
+    del resultats
+
+    t_m2.append(t1-t0)
+
+print (f'La méthode optimisée a mis {sum(t_m1)/len(t_m1)*1000} ms en moyenne sur {it} itérations.')
+print (f'La méthode complète  a mis {sum(t_m2)/len(t_m2)*1000} ms en moyenne sur {it} itérations.')
 
