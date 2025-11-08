@@ -24,15 +24,21 @@ L'interface graphique prpose deux cas de charegs pour l'instant :
 # Résultats
 Les résultats sont édités sous forme d'un fichier texte.
 
-# GUI - Interface graphique
-Pour l'instant l'interface graphique est limitée à la saisie de la structure et au lancement du calcul.
-Reste à faire :
-- présentation des résultats
-- possibilité de choisir une autre charge de référence, voire de construire un chargement complexe...
+# Problèmes 
+- Seuls les cas de structures avec interfaces entièrement collées fonctionnent. Une tentative d'implémentation des interfaces glissantes a été testée mais donne des résultats érronés => à conforter avec un test sur alize
 
-# Problèmes et améliorations
-- Seuls les cas de structures avec interfaces entièrement collées focntionnent. Une tentative d'implémentation des interfaces glissantes a été testée mais donne des résultats érronés.
+# Améliorations
+- ajouter une interface seùmi-collée : les résulats seront la demi-somme des cas collés et glissant (cf. NP 98-086)
 - prévoir une bibliotheque de matériaux (NF P 98 086)
+
+    ## GUI - Interface graphique
+    Pour l'instant l'interface graphique est limitée à la saisie de la structure et au lancement du calcul.
+    Reste à faire :
+    - présentation des résultats
+    - possibilité de choisir une autre charge de référence, voire de construire un chargement complexe...
+
+# tests à faire
+- test de vitesse de calcul sur les deux méthodes (en commençant par toutes interfaces collées)
 
 
 
