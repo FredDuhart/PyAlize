@@ -637,7 +637,7 @@ class calculation :
 
             a_conv.append(np.array(l_conv).T)
 
-        a_conv_ = sum(a_conv) /2
+        a_conv_ = sum(a_conv) / len (a_conv)
 
 
         columns = pd.MultiIndex.from_product([keys, self.params.r_points], names=["Sollicitations", "r (m)"])
