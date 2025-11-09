@@ -42,6 +42,11 @@ Les résultats sont édités sous forme d'un fichier texte.
  ===> Fait la méthode 'optimisée' ne l'est pas du tout ! + 40 % de temps
        la méthode optimisée a été supprimée
 
+# Inspirations
+https://www.mathworks.com/matlabcentral/fileexchange/69465-multi-layer-elastic-analysis
+https://github.com/Mostafa-Nakhaei/PyMastic
+
+
 
 
 
