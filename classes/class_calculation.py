@@ -89,19 +89,14 @@ class calculation :
     def soll_star(self, ABCD, m, z_points, r_point, c_points ) :
         #initialisation de la variable de rendu
         # la variable de rendu est un dictionnaire
-        
-
+    
         A = ABCD[0]
         B = ABCD[1]
         C = ABCD[2]
         D = ABCD[3]
         
-      
-
-
         response = {'s_z*' : [], 's_t*' : [], 's_r*' : [], 't_rz*' : [], 'w*' : [], 'u*' : []}
         
-
         H = self.struct.htot()
         rho=r_point/H
 
@@ -109,8 +104,6 @@ class calculation :
         
         for i, zz in enumerate(z_points): # boucle sur les z
             
-            
-
             lmm = zz/H
             ii = c_points[i]
         
@@ -123,46 +116,24 @@ class calculation :
                 virtual_l.lb = 0
                 self.struct.layers.append(virtual_l)
             
-            
-
-
             # pour gérer rho = 0 pour sigma t et sigma r            
-
             if rho == 0 :
-                COEF1 = m/2 # reste à vérifier car vu nulle part !
+                COEF1 = m/2 # limite de j1(m * rho) / rho quand rho (r) tend vers 0
             else :
                 COEF1 = j1(m * rho) / rho            
 
-
             # sigma z
-            
-                
             sigma_z = -m * j0(m * rho) * ((A[ii] - C[ii] * (1 - 2 * self.struct.layers[ii].poisson - m * lmm)) * math.exp(-m * (self.struct.layers[ii].lb - lmm)) 
                                         + (B[ii] + D[ii] * (1 - 2 * self.struct.layers[ii].poisson + m * lmm)) * math.exp(-m * (lmm - self.struct.layers[ii - 1].lb))) 
-
             # sigma t
-                        
-                        
             sigma_t = COEF1 * ((A[ii] + C[ii] * (1 + m * lmm)) * math.exp(-m * (self.struct.layers[ii].lb - lmm)) + (B[ii] - D[ii] * (1 - m * lmm)) * math.exp(-m * (lmm - self.struct.layers[ii - 1].lb))) + 2 * self.struct.layers[ii].poisson * m * j0(m * rho) * (C[ii] * math.exp(-m * (self.struct.layers[ii].lb - lmm)) - D[ii] * math.exp(-m * (lmm - self.struct.layers[ii - 1].lb)))
-            
-                
             # sigma r
-            
             sigma_r = (m * j0( m * rho) - COEF1) * ((A[ii] + C[ii] * (1 + m * lmm)) * math.exp(-m * (self.struct.layers[ii].lb - lmm)) + (B[ii] - D[ii] * (1 - m * lmm)) * math.exp(-m * (lmm - self.struct.layers[ii-1].lb))) + 2 * self.struct.layers[ii].poisson * m * j0( m * rho) * (C[ii] * math.exp(-m * (self.struct.layers[ii].lb - lmm)) - D[ii] * math.exp(-m * (lmm - self.struct.layers[ii - 1].lb)))
-
-            
-            
-            
             # tau rz
-            
             tau_rz = m * j1( m * rho) * ((A[ii] + C[ii] * (2 * self.struct.layers[ii].poisson + m * lmm)) * math.exp(-m * (self.struct.layers[ii].lb - lmm)) - (B[ii] - D[ii] * (2 * self.struct.layers[ii].poisson - m * lmm)) * math.exp(-m * (lmm - self.struct.layers[ii - 1].lb)))
-            
             # w 
-            
             w = -H*(1 + self.struct.layers[ii].poisson) / self.struct.layers[ii].module * j0( m * rho) * ((A[ii] - C[ii] * (2 - 4 * self.struct.layers[ii].poisson - m * lmm)) * math.exp(-m * (self.struct.layers[ii].lb - lmm)) - (B[ii] + D[ii] * (2 - 4 * self.struct.layers[ii].poisson + m * lmm)) * math.exp(-m * (lmm - self.struct.layers[ii - 1].lb)))         
-            
             # u 
-            
             u = H*(1 + self.struct.layers[ii].poisson) / self.struct.layers[ii].module * j1( m * rho) * ((A[ii] + C[ii] * (1 + m * lmm)) * math.exp(-m * (self.struct.layers[ii].lb - lmm)) + (B[ii] - D[ii] * (1 - m * lmm)) * math.exp(-m * (lmm - self.struct.layers[ii - 1].lb)))
 
             response['s_z*'].append(sigma_z)
@@ -175,12 +146,9 @@ class calculation :
             if ii == 0 :
                 del self.struct.layers[-1]
                 virtual_l = None  
-
-
                 
         # fin de boucle z
 
-        
         return response
         
     def ABCD_ub(self, m, R,  l_interface) :
@@ -278,51 +246,51 @@ class calculation :
                 
             
             elif not (l_interface[couche]): # cas glissant
-                zro = 0  #?+ 1e-50
+                zro = 1e-50
             
                 # partie gauche
-                    
-                Mat[lig+0,col+0] = 1
-                Mat[lig+1,col+0] = 1
-                Mat[lig+2,col+0] = 1
-                Mat[lig+3,col+0] = zro
-                
+                # sigma z
+                Mat[lig+0,col+0]=1
                 Mat[lig+0,col+1] = F[couche]
-                Mat[lig+1,col+1] = F[couche]
-                Mat[lig+2,col+1] = -F[couche]
-                Mat[lig+3,col+1] = zro
-                
                 Mat[lig+0,col+2] = -(1 - 2 * self.struct.layers[couche].poisson - m * self.struct.layers[couche].lb)
-                Mat[lig+1,col+2] = 1 + m * self.struct.layers[couche].lb
-                Mat[lig+2,col+2] = 2*self.struct.layers[couche].poisson + m * self.struct.layers[couche].lb
-                Mat[lig+3,col+2] = zro
-                
-                Mat[lig+0,col+3] = (1 - 2 * self.struct.layers[couche].poisson + m * self.struct.layers[couche].lb) * F[couche]
-                Mat[lig+1,col+3] = -(1 - m * self.struct.layers[couche].lb) * F[couche]
-                Mat[lig+2,col+3] = (2 * self.struct.layers[couche].poisson - m * self.struct.layers[couche].lb) * F[couche]
-                Mat[lig+3,col+3] = zro 
-        
-                # partie droite
-                
+                Mat[lig+0,col+3] = (1 - 2 * self.struct.layers[couche].poisson + m * self.struct.layers[couche].lb) * F[couche]  
+                # w
+                Mat[lig+2,col+0] = 1
+                Mat[lig+2,col+1] = F[couche]
+                Mat[lig+2,col+2] = 1 + m * self.struct.layers[couche].lb
+                Mat[lig+2,col+3] = -(1 - m * self.struct.layers[couche].lb )* F[couche]
+                # tau_rz_couche
+                Mat[lig+1,col+0] = 1
+                Mat[lig+1,col+1] = -F[couche]
+                Mat[lig+1,col+2] = (2 * self.struct.layers[couche].poisson + m * self.struct.layers[couche].lb)
+                Mat[lig+1,col+3] = (2 * self.struct.layers[couche].poisson - m * self.struct.layers[couche].lb) * F[couche]
+                # tau_rz_couche+1
+                Mat[lig+3,col+0] = 0
+                Mat[lig+3,col+1] = 0
+                Mat[lig+3,col+2] = 0
+                Mat[lig+3,col+3] = 0 
+                # partie droite -----------------------------
+                # sigma z
                 Mat[lig+0,col+4+0] = -F[couche+1]  
-                Mat[lig+1,col+4+0] = -R[couche]*F[couche+1]
-                Mat[lig+2,col+4+0] = zro  
-                Mat[lig+3,col+4+0] = -F[couche+1]
-                    
-                Mat[lig+0,col+4+1] = -1  
-                Mat[lig+1,col+4+1] = -R[couche]
-                Mat[lig+2,col+4+1] = zro  
-                Mat[lig+3,col+4+1] = 1
-                
-                Mat[lig+0,col+4+2] = (1 - 2 * self.struct.layers[couche+1].poisson - m * self.struct.layers[couche].lb) * F[couche+1]
-                Mat[lig+1,col+4+2] = -(1 + m * self.struct.layers[couche].lb) * R[couche] * F[couche+1]
-                Mat[lig+2,col+4+2] = zro
-                Mat[lig+3,col+4+2] = -(2 * self.struct.layers[couche+1].poisson + m * self.struct.layers[couche].lb) * F[couche+1]
-                
+                Mat[lig+0,col+4+1] = -1 
+                Mat[lig+0,col+4+2] = (1 - 2 * self.struct.layers[couche+1].poisson - m * self.struct.layers[couche].lb) * F[couche+1] 
                 Mat[lig+0,col+4+3] = -(1 - 2 * self.struct.layers[couche+1].poisson + m * self.struct.layers[couche].lb)
-                Mat[lig+1,col+4+3] = (1 - m * self.struct.layers[couche].lb) * R[couche]
-                Mat[lig+2,col+4+3] = zro
-                Mat[lig+3,col+4+3] = -(2*self.struct.layers[couche+1].poisson - m*self.struct.layers[couche].lb)
+                # w
+                Mat[lig+2,col+4+0] = -R[couche] * F[couche+1] 
+                Mat[lig+2,col+4+1] = -R[couche]
+                Mat[lig+2,col+4+2] = -(1 + m * self.struct.layers[couche].lb) * R[couche] * F[couche+1]
+                Mat[lig+2,col+4+3] = (1 - m * self.struct.layers[couche].lb) * R[couche]     
+                #tau_rz_couche+1
+                Mat[lig+3,col+4+0] = -F[couche+1]
+                Mat[lig+3,col+4+1] = 1
+                Mat[lig+3,col+4+2] = -(2 * self.struct.layers[couche+1].poisson + m * self.struct.layers[couche].lb) * F[couche+1]
+                Mat[lig+3,col+4+3] = -((2 * self.struct.layers[couche+1].poisson - m * self.struct.layers[couche].lb))                
+                # tau_rz_couche
+                Mat[lig+1,col+4+0] = 0
+                Mat[lig+1,col+4+1] = 0
+                Mat[lig+1,col+4+2] = 0
+                Mat[lig+1,col+4+3] = 0
+                
                 
         
         # réduction de la matrice en enlevant les colonnes pour An et Cn (car An = 0 et Cn = 0)    

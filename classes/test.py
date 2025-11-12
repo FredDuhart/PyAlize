@@ -24,32 +24,56 @@ nu=[0.35, 0.35, 0.35, 0.35]
 isbonded= 1
 '''
 # structure *******************************************************************
-a_layer = layer()
-aa_layer = layer()
-b_layer = layer()
-c_layer = layer()
-d_layer = layer()
-bb_layer = layer()
 
-aa_layer.define('BBTM', 0.025, 3000, 0.35, 0, 0)
-a_layer.define('BB' , 0.06, 7000, 0.35, 0, 1)
-b_layer.define('GB3', 0.13, 9000   , 0.35, 0, 2)
-bb_layer.define('GB3', 0.13, 9000   , 0.35, 0, 3)
-d_layer.define('CdF', None, 50, 0.35, 0, 4)
-struct = structure()
-struct.add_layer(aa_layer)
-struct.add_layer(a_layer)
-struct.add_layer(b_layer)
-struct.add_layer(bb_layer)
-struct.add_layer(d_layer)
-struct.calc_struct()
+
+def cas1_bb() :
+    a_layer = layer()
+    aa_layer = layer()
+    b_layer = layer()
+    c_layer = layer()
+    d_layer = layer()
+    bb_layer = layer()
+    aa_layer.define('BBTM', 0.025, 3000, 0.35, 0, 0)
+    a_layer.define('BB' , 0.06, 7000, 0.35, 0, 1)
+    b_layer.define('GB3', 0.13, 9000   , 0.35, 0, 2)
+    bb_layer.define('GB3', 0.13, 9000   , 0.35, 0, 3)
+    d_layer.define('CdF', None, 50, 0.35, 0, 4)
+    struct = structure()
+    struct.add_layer(aa_layer)
+    struct.add_layer(a_layer)
+    struct.add_layer(b_layer)
+    struct.add_layer(bb_layer)
+    struct.add_layer(d_layer)
+    struct.calc_struct()
+
+    return struct
+
+def cas1_rigide() :
+    a_layer = layer()
+    b_layer = layer()
+    c_layer = layer()
+    a_layer.define('BC5', 0.23, 35000, 0.25, 2, 0)
+    b_layer.define('BC2', 0.18, 20000, 0.25, 0, 1)
+    c_layer.define('PF2', None, 50, 0.35, 0, 2)
+    struct = structure()
+    
+    struct.add_layer(a_layer)
+    struct.add_layer(b_layer)
+    
+    struct.add_layer(c_layer)
+    struct.calc_struct()
+
+    return struct
+
+struct = cas1_bb()
+struct = cas1_rigide()
 
 print (struct.export_tab())
 
 
 # chargement ****************************
 disj = 0.375
-#disj = 0 
+disj = 0 
 load_ = load(disj = disj)
 
 
@@ -57,11 +81,11 @@ load_ = load(disj = disj)
 
 params = calc_params(struct, load_)
 
-#params.add_z_points(0.02)
+params.add_z_points(0.02)
 
 
 # distance entre les deux roues du jumelage
-rp=[0] 
+rp=[0, 0.1875] 
 if load_.type == 'jumelage' :
     rp = [0, disj/2, disj]
 
@@ -75,7 +99,7 @@ resultats = calculation(struct, params, load_)
 res  = resultats.final_results
 
 
-print (res)
+
 ###### Cas d'un jumelage ####################
 
 def res_jum (res, rr) :
@@ -104,9 +128,7 @@ def res_jum (res, rr) :
 if load_.type == 'jumelage' :
     res =  res_jum(res, params.r_points)
 
-#################################
-ff='test_semi3'
-file_name = "C:/Users/f.duhart/OneDrive - Département de la Gironde/Documents/06-Git/PyAlize/exports/"+ff+".txt"
-# ecriture txt
-export_results (res, load_, struct, file_name)
+res  =res [['s_z', 's_t', 't_rz', 'w', 'u' ]]
+
+print (res.head(25))
 

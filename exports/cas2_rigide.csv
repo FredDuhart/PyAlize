@@ -1,0 +1,5 @@
+nom,épaisseur,module,"coefficient
+ de poisson",interface
+BC6,0.2,40000,0.25,Semi-collée
+GB3,0.13,9000,0.35,Collée
+PF2qs,0,80,0.35,Collée
