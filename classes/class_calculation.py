@@ -322,7 +322,7 @@ class calculation :
                 Mat[lig+0,col+4+3] = -(1 - 2 * self.struct.layers[couche+1].poisson + m * self.struct.layers[couche].lb)
                 Mat[lig+1,col+4+3] = (1 - m * self.struct.layers[couche].lb) * R[couche]
                 Mat[lig+2,col+4+3] = zro
-                Mat[lig+3,col+4+3] = -(2*self.struct.layers[couche+1].poisson-m*self.struct.layers[couche].lb)
+                Mat[lig+3,col+4+3] = -(2*self.struct.layers[couche+1].poisson - m*self.struct.layers[couche].lb)
                 
         
         # réduction de la matrice en enlevant les colonnes pour An et Cn (car An = 0 et Cn = 0)    

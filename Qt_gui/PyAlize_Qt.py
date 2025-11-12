@@ -118,7 +118,7 @@ class TableStruct(QTableView):
         self.setItemDelegateForColumn(1, FloatDelegate(decimals=3, min_val=0.0, max_val=1000.0, step=0.001)) # épaisseur
         self.setItemDelegateForColumn(2, IntDelegate()) # Module
         self.setItemDelegateForColumn(3, FloatDelegate(decimals=2, min_val=0.0, max_val=1.0, step=0.01)) # poisson
-        self.setItemDelegateForColumn(4, ComboBoxDelegate(["Collée", "Semi-collée" "Glissante"], self))
+        self.setItemDelegateForColumn(4, ComboBoxDelegate(["Collée", "Semi-collée", "Glissante"], self))
 
         # Configuration des en-têtes
         header = self.horizontalHeader()
