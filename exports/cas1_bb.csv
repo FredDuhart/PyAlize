@@ -1,0 +1,7 @@
+nom,épaisseur,module,"coefficient
+ de poisson",interface
+BBTM,0.025,3000,0.35,Collée
+BBSG,0.06,7000,0.35,Collée
+GB3,0.13,9000,0.35,Collée
+GB3,0.13,9000,0.35,Collée
+CdF,0,50,0.35,Collée

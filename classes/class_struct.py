@@ -19,18 +19,18 @@ class layer :
         self.thickness : float = None
         self.module : int = None        
         self.poisson : float = None
-        self.interface : bool = None # True = collée (bond)
+        self.interface : int = None # 0 = collée (bond), 1 = semi-collée (half_bond), 2 = glissante (frictionless)
         self.order : int = None
         self.lb : float = None
         self.z : float = None # profondeur max de la couche
 
         
-    def define(self, name : str ,thickness : float , module : int , poisson : float , interface : bool , order : int ) :
+    def define(self, name : str ,thickness : float , module : int , poisson : float , interface : int , order : int ) :
         self.name  = name
         self.thickness : float = thickness
         self.module : int = module        
         self.poisson : float = poisson
-        self.interface : bool  = interface
+        self.interface : int  = interface
         self.order : int = order
 
     def re_order (self, order) :
@@ -80,9 +80,11 @@ class structure :
         dico_struct=[]
         
         for l in self.layers :
-            if l.interface : 
+            if l.interface == 0 : 
                 inter = 'Collée'
-            else : 
+            elif l.interface == 1 : 
+                inter = 'Semi-collée'
+            elif l.interface == 2 :
                 inter = 'Glissante'
             dico_struct.append({'Matériau' : l.name,
                                 'Ep. (m)' : l.thickness,

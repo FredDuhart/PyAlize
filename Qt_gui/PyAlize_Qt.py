@@ -118,7 +118,7 @@ class TableStruct(QTableView):
         self.setItemDelegateForColumn(1, FloatDelegate(decimals=3, min_val=0.0, max_val=1000.0, step=0.001)) # épaisseur
         self.setItemDelegateForColumn(2, IntDelegate()) # Module
         self.setItemDelegateForColumn(3, FloatDelegate(decimals=2, min_val=0.0, max_val=1.0, step=0.01)) # poisson
-        self.setItemDelegateForColumn(4, ComboBoxDelegate(["Collée", "Glissante"], self))
+        self.setItemDelegateForColumn(4, ComboBoxDelegate(["Collée", "Semi-collée", "Glissante"], self))
 
         # Configuration des en-têtes
         header = self.horizontalHeader()
@@ -159,7 +159,7 @@ class TableStruct(QTableView):
         for idx in sorted(sel, key=lambda x: x.row(), reverse=True):
             self.model.removeRow(idx.row())
 
-    def export_to_csv(self, filename):
+    def export_to_csv_old(self, filename):
         headers = [self.model.headerData(i, Qt.Horizontal) for i in range(self.model.columnCount())]
         with open(filename, "w", newline="", encoding='utf-8') as f:
             writer = csv.writer(f)
@@ -169,6 +169,25 @@ class TableStruct(QTableView):
                     self.model.item(r, c).text() if self.model.item(r, c) else ""
                     for c in range(self.model.columnCount())
                 ])
+
+    def export_to_csv(self, filename):
+        headers = [self.model.headerData(i, Qt.Horizontal) for i in range(self.model.columnCount())]
+        with open(filename, "w", newline="", encoding='utf-8') as f:
+            writer = csv.writer(f)
+            writer.writerow(headers)
+            for r in range(self.model.rowCount()):
+                text_row=[]
+                for c in range (self.model.columnCount()):
+                    #print (f'{r+1} x {c+1} =====> {self.model.item(r, c).text()}')
+                    if self.model.item(r, c) :
+                        if self.model.item(r, c).text() == 'None' :
+                            cr = 0
+                        else :
+                            cr=self.model.item(r, c).text()
+                    else :
+                        cr = ""
+                    text_row.append(cr)   
+                writer.writerow(text_row)
 
     def export_struct(self) :
         # exporte les données sous forme d'un objet structure
@@ -183,10 +202,12 @@ class TableStruct(QTableView):
             module = self.model.item(r, 2).text()
             nu = self.model.item(r, 3).text()
             inter = self.model.item(r,4).text()
-            if inter == 'Collée' or inter == 'colléé' :
-                inter = True
+            if inter == 'Collée' or inter == 'collée' :
+                inter = 0
+            elif inter == 'Semi-collée' :
+                inter = 1
             else :
-                inter = False
+                inter = 2
             a_layer = layer()
             a_layer.define(nom, float(ep), int(module), float(nu), inter, r)
             struct.add_layer(a_layer)
@@ -355,7 +376,7 @@ class MainWindow(QMainWindow):
                     mo = int(float(line[2]))
                     cf = float(line[3])
                     interf = line[4].strip()
-                    if interf not in ["Collée", "Glissante"]:
+                    if interf not in ["Collée", "Semi-collée", "Glissante"]:
                         raise ValueError(f"Interface invalide : {interf}")
                     new_data.append([nom, ep, mo, cf, interf])
                 self.table.model.removeRows(0, self.table.model.rowCount())

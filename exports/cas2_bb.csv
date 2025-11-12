@@ -1,0 +1,5 @@
+nom,épaisseur,module,"coefficient
+ de poisson",interface
+BBTM,0.025,3000,0.35,Collée
+EME2,0.12,14000,0.35,Collée
+PF3,0.0,120,0.35,Collée

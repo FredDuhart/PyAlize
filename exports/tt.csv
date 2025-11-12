@@ -1,0 +1,5 @@
+nom,épaisseur,module,"coefficient
+ de poisson",interface
+BB,0.06,7000,0.35,Collée
+GB4,0.13,11000,0.35,Collée
+CdF,1111,50,0.35,Collée
