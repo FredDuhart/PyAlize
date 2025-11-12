@@ -25,17 +25,26 @@ isbonded= 1
 '''
 # structure *******************************************************************
 a_layer = layer()
+aa_layer = layer()
 b_layer = layer()
 c_layer = layer()
 d_layer = layer()
-a_layer.define('BB' , 0.06, 7000, 0.35, 0, 0)
-b_layer.define('GB3', 0.12, 10000   , 0.35, 2, 1)
-d_layer.define('CdF', None, 50, 0.35, 0,3)
+bb_layer = layer()
+
+aa_layer.define('BBTM', 0.025, 3000, 0.35, 0, 0)
+a_layer.define('BB' , 0.06, 7000, 0.35, 0, 1)
+b_layer.define('GB3', 0.13, 9000   , 0.35, 0, 2)
+bb_layer.define('GB3', 0.13, 9000   , 0.35, 0, 3)
+d_layer.define('CdF', None, 50, 0.35, 0, 4)
 struct = structure()
+struct.add_layer(aa_layer)
 struct.add_layer(a_layer)
 struct.add_layer(b_layer)
+struct.add_layer(bb_layer)
 struct.add_layer(d_layer)
+struct.calc_struct()
 
+print (struct.export_tab())
 
 
 # chargement ****************************

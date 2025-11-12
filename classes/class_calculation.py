@@ -203,6 +203,7 @@ class calculation :
         
         s_Mat = (4 * n  - 2 , 4 * n  )
         Mat = np.zeros (s_Mat, dtype=np.float64)
+
         
         # equations B.9 ====> condtions limites à la surface
         
@@ -277,7 +278,7 @@ class calculation :
                 
             
             elif not (l_interface[couche]): # cas glissant
-                zro = 0 #1e-50
+                zro = 0  #?+ 1e-50
             
                 # partie gauche
                     
@@ -344,16 +345,16 @@ class calculation :
         try :
 
             res = np.linalg.solve(Mat_fin, vect_droite)
-        
+            
         except Exception as e:
             print ( f"Échec dans la résolution : {e}")
         
         # définition des tableau A, B, C et D
         
-        A=np.zeros(4,dtype=np.float64)
-        B=np.zeros(4,dtype=np.float64)
-        C=np.zeros(4,dtype=np.float64)
-        D=np.zeros(4,dtype=np.float64)
+        A=np.zeros(n,dtype=np.float64)
+        B=np.zeros(n,dtype=np.float64)
+        C=np.zeros(n,dtype=np.float64)
+        D=np.zeros(n,dtype=np.float64)
         
         for i in range (n) :
         
@@ -493,10 +494,7 @@ class calculation :
             Boucle sur les conditions d'interface
         '''
         responses =[]
-        print ('___ L INTERFACE _____')
-        for l in l_interface :
-            print (l)
-
+        
         for ii, l_inter in enumerate(l_interface) :
             print (f' CALCUL # {ii+1} ------+++++ taille responses = {len(responses)}')
             ''' ---------------------------------------------------------------------------------
@@ -535,16 +533,8 @@ class calculation :
                     m=couple_m[0]
                     poids_m = couple_m[1]
                     
-                    try :                                       
-                        #print('calcul complet') 
-                        ABCD = self.ABCD_ub(m, R_, l_inter) # il va falloir itérer sur L_inetrface si semi-collée
-                        rstar =  self.soll_star(ABCD, m, z_points, rr, c_points )
-                    except:
-                        print (' ')
-                        print ("//!\\ //!\\ //!\\ //!\\ //!\\") 
-                        print (f'erreur itération {k}')
-                        print ("//!\\ //!\\ //!\\ //!\\ //!\\")
-                        print (' ')
+                    ABCD = self.ABCD_ub(m, R_, l_inter) # il va falloir itérer sur L_inetrface si semi-collée
+                    rstar =  self.soll_star(ABCD, m, z_points, rr, c_points )
                     
                     # Récupération des valeurs pour itréation - 1           
                     if k == (k_max)-4 : # 4 car les intervalles d'intégrations sont divisés en 4
@@ -648,25 +638,4 @@ class calculation :
 
 
 
-    def dict_to_df(self, dico) :
-
-        l_conv = []
-        keys = list(dico.keys())
-
-        for key in keys :
-            cols = dico[key]
-            for i, col  in enumerate(cols) :
-                col = list(col)
-                col.insert(0,key)
-                col.insert(1,self.params.r_points[i])
-                l_conv.append(col)
-
-        l_conv_T = list(map(list, zip(*l_conv)))
-                
-        columns = pd.MultiIndex.from_arrays(l_conv_T[:2], names=["Sollicitations", "r (m)"])
-        values = l_conv_T[2:]
-        df = pd.DataFrame(values, columns=columns)
-        df.index = pd.MultiIndex.from_arrays([self.params.c_points, self.params.z_points], names=['couche', 'z (m)'])
-
-
-        return df
+    
